@@ -1,0 +1,7 @@
+{
+  "name": "com.mailsorter.backend",
+  "description": "MailSorter Native Backend",
+  "path": "e:\\MailSorter\\backend\\main.py",
+  "type": "stdio",
+  "allowed_extensions": [ "mailsorter@planv5.local" ]
+}

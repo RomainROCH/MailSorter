@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MailSorter Configuration",
+  "type": "object",
+  "required": ["provider"],
+  "properties": {
+    "provider": {"type": "string"},
+    "providers": {
+      "type": "object",
+      "additionalProperties": {"type": "object"}
+    },
+    "analysis_mode": {"type": "string", "enum": ["full", "headers_only"]},
+    "thresholds": {"type": "object", "additionalProperties": {"type": "number"}},
+    "log_level": {"type": "string", "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]},
+    "batch_mode": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "provider": {"type": "string"}
+      },
+      "required": ["enabled"]
+    }
+  },
+  "additionalProperties": false
+}

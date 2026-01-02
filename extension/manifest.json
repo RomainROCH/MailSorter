@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+  "name": "MailSorter AI",
+  "version": "1.0.0",
+  "description": "Tri automatique des emails via LLM Local (Ollama) ou Cloud. Conformité RGPD Plan V5.",
+  "author": "DevOps Guard",
+  "icons": {
+    "48": "icons/icon-48.png"
+  },
+  "permissions": [
+    "messagesRead",
+    "messagesModify",
+    "accountsRead",
+    "foldersRead",
+    "nativeMessaging",
+    "storage"
+  ],
+  "background": {
+    "scripts": ["background/native_client.js", "background/background.js"]
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "browser_style": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "mailsorter@planv5.local",
+      "strict_min_version": "115.0"
+    }
+  }
+}

@@ -1,0 +1,87 @@
+# Instruction Engine - Task Pipeline (Developer-Local)
+# These files are developer-specific and should not be committed
+.instructions/tasks.md
+.instructions/raw.tasks.md
+.instructions/failed.tasks.md
+
+# Instruction Engine - Generated Outputs (Developer-Local)
+.instructions-output/
+
+# Instruction Engine - Local Context (Optional)
+# Uncomment these lines if you want to keep context files private:
+# .instructions/contexts/
+# .instructions/project.index.md
+
+# Instruction Engine - Local Skill Overrides (Optional)
+# Uncomment if using legacy .instructions/skills/ overrides:
+# .instructions/skills/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE Files
+.vscode/
+.idea/
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+*.pyc
+
+# Backend configuration (examples contain no secrets)
+backend/config.json
+backend/config.json.example
+
+# Local logs
+.mailsorter/
+
+# Test cache
+backend/.pytest_cache/
+
+# Extension build artifacts
+extension/web-ext-artifacts/
+
+# Virtualenvs
+.venv/
+env/
+venv/
+
+# Packaging
+*.egg-info/
+
+# Misc
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Build Artifacts
+dist/
+build/
+out/
+bin/
+obj/
+
+# Dependencies
+node_modules/
+packages/
+.pnp/
+.pnp.js
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/

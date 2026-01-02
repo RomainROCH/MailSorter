@@ -1,5 +1,9 @@
 # MailSorter (Plan V5)
 
+![Version](https://img.shields.io/badge/version-0.1.0--alpha-orange) ![License](https://img.shields.io/badge/license-MIT-blue) ![Status](https://img.shields.io/badge/status-alpha-red)
+
+**Version:** 0.1.0-alpha | [Changelog](CHANGELOG.md) | [Versioning Strategy](docs/VERSIONING.md)
+
 ## Description
 Système de tri d'emails intelligent pour Thunderbird/Betterbird, utilisant des LLM locaux (Ollama) ou Cloud.
 Conçu avec une approche "Privacy First" et une architecture robuste (WebExtension + Native Messaging).
@@ -39,6 +43,21 @@ Il faut déclarer le script Python à Thunderbird via une clé de registre (Wind
 3.  Les nouveaux emails seront analysés et déplacés automatiquement.
 4.  Consultez les logs dans `~/.mailsorter/logs/` pour le debug.
 
-## Avertissement
+## ⚠️ Avertissement
 Ce code est une implémentation de référence du Plan V5.
 **Ne pas utiliser en production critique sans audit préalable.**
+
+**Statut actuel (v0.1.0-alpha)** :
+- ✅ Architecture fonctionnelle
+- ✅ Ollama provider opérationnel
+- ✅ Privacy Guard (scrubbing PII)
+- ⚠️ Configuration partiellement hardcodée
+- ⚠️ Parsing MIME simplifié
+- ❌ Pas d'installateur Windows automatique
+- ❌ Tests incomplets
+
+## Contributing
+Voir [CONTRIBUTING.md](CONTRIBUTING.md) pour les guidelines.
+
+## License
+MIT License - voir [LICENSE](LICENSE)

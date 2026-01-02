@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
   "name": "MailSorter AI",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Tri automatique des emails via LLM Local (Ollama) ou Cloud. Conformité RGPD Plan V5.",
-  "author": "DevOps Guard",
+  "author": "MailSorter Contributors",
   "icons": {
     "48": "icons/icon-48.png"
   },

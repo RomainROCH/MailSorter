@@ -2,7 +2,6 @@ import os
 import tempfile
 
 from backend.utils.config import load_config, validate_config
-from jsonschema import ValidationError
 
 
 def test_load_default_config(monkeypatch, tmp_path):

@@ -108,7 +108,7 @@ def validate_config(cfg: Dict[str, Any]) -> None:
 
     try:
         validate(instance=cfg, schema=schema_data)
-    except ValidationError as e:
+    except ValidationError:
         # Re-raise with clearer message
         raise
 

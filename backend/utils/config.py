@@ -87,7 +87,6 @@ def validate_config(cfg: Dict[str, Any]) -> None:
     TODO: Cache schema loading for performance.
     """
     from jsonschema import validate, ValidationError
-    import pkgutil
     import json
 
     if not isinstance(cfg, dict):

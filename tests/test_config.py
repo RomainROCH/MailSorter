@@ -1,7 +1,5 @@
 import os
-import json
 import tempfile
-import shutil
 
 from backend.utils.config import load_config, validate_config
 from jsonschema import ValidationError

@@ -44,4 +44,3 @@ def setup_logger(name="MailSorter"):
 
 
 logger = setup_logger()
-

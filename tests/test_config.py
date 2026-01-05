@@ -30,4 +30,3 @@ def test_validate_bad_config(tmp_path):
         assert False, "Validation should have failed"
     except Exception:
         assert True
-

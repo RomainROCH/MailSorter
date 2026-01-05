@@ -1,5 +1,5 @@
 import requests
-import json
+
 from typing import List, Optional
 from .base import LLMProvider
 from ..utils.logger import logger
@@ -7,6 +7,7 @@ from ..utils.logger import logger
 # Ce code applique le Plan V5 du projet de tri d’emails LLM, avec conformité RGPD et sécurité renforcée.
 # Pour toute hypothèse technique non vérifiée, voir les TODO dans le code.
 # Toute modification doit être validée par audit RGPD et revue technique.
+
 
 class OllamaProvider(LLMProvider):
     """
@@ -28,13 +29,15 @@ class OllamaProvider(LLMProvider):
             logger.warning(f"Ollama Health Check Failed: {e}")
             return False
 
-    def classify_email(self, subject: str, body: str, available_folders: List[str]) -> Optional[str]:
+    def classify_email(
+        self, subject: str, body: str, available_folders: List[str]
+    ) -> Optional[str]:
         """
         Utilise Ollama pour classifier l'email.
         """
         # Construction du prompt Anti-Hallucination
         folders_str = ", ".join([f'"{f}"' for f in available_folders])
-        
+
         prompt = f"""
         You are an intelligent email sorting assistant.
         Task: Categorize the following email into ONE of the existing folders.
@@ -52,28 +55,26 @@ class OllamaProvider(LLMProvider):
         Folder:
         """
 
-        payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "stream": False
-        }
+        payload = {"model": self.model, "prompt": prompt, "stream": False}
 
         try:
             response = requests.post(self.api_endpoint, json=payload, timeout=10)
             response.raise_for_status()
             result = response.json()
-            
+
             predicted_folder = result.get("response", "").strip()
-            
+
             # Validation post-traitement (Anti-Hallucination)
             # On vérifie que le dossier prédit existe vraiment
             if predicted_folder in available_folders:
                 return predicted_folder
-            elif "Inbox" in predicted_folder: # Fallback soft
+            elif "Inbox" in predicted_folder:  # Fallback soft
                 return "Inbox"
             else:
-                logger.warning(f"Hallucination detected: '{predicted_folder}' not in {available_folders}")
-                return None # Fallback to Inbox handled by caller
+                logger.warning(
+                    f"Hallucination detected: '{predicted_folder}' not in {available_folders}"
+                )
+                return None  # Fallback to Inbox handled by caller
 
         except requests.exceptions.Timeout:
             logger.error("Ollama Timeout - Fallback to Inbox")

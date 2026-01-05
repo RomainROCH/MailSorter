@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from .logger import logger
 
@@ -18,13 +18,11 @@ TODO: Consider merging with platform-specific config (XDG paths).
 
 _DEFAULT_CONFIG = {
     "provider": "ollama",
-    "providers": {
-        "ollama": {"base_url": "http://localhost:11434", "model": "llama3"}
-    },
+    "providers": {"ollama": {"base_url": "http://localhost:11434", "model": "llama3"}},
     "analysis_mode": "full",
     "thresholds": {},
     "log_level": "INFO",
-    "batch_mode": {"enabled": False}
+    "batch_mode": {"enabled": False},
 }
 
 _config_cache: Dict[str, Any] = {}
@@ -35,7 +33,7 @@ def _default_config_path() -> str:
     return os.path.join(base_dir, "config.json")
 
 
-def load_config(path: str = None) -> Dict[str, Any]:
+def load_config(path: Optional[str] = None) -> Dict[str, Any]:
     """Load configuration from JSON with sensible fallbacks.
 
     Returns a dictionary with configuration values. Raises FileNotFoundError only
@@ -52,7 +50,9 @@ def load_config(path: str = None) -> Dict[str, Any]:
     if env_path:
         candidates.append(env_path)
     candidates.append(_default_config_path())
-    candidates.append(os.path.join(os.path.dirname(__file__), "..", "config.json.example"))
+    candidates.append(
+        os.path.join(os.path.dirname(__file__), "..", "config.json.example")
+    )
 
     for p in candidates:
         try:
@@ -73,7 +73,9 @@ def load_config(path: str = None) -> Dict[str, Any]:
             continue
 
     # No valid config found; return defaults but log warning
-    logger.warning("No config found; using default conservative configuration. Create 'backend/config.json' to customize.")
+    logger.warning(
+        "No config found; using default conservative configuration. Create 'backend/config.json' to customize."
+    )
     _config_cache = _DEFAULT_CONFIG.copy()
     return _config_cache
 
@@ -86,16 +88,16 @@ def validate_config(cfg: Dict[str, Any]) -> None:
 
     TODO: Cache schema loading for performance.
     """
-    from jsonschema import validate, ValidationError
-    import pkgutil
-    import json
+    from jsonschema import ValidationError, validate
 
     if not isinstance(cfg, dict):
         raise ValueError("Configuration must be a JSON object/dict")
 
     # Load schema from package data
     schema_data = None
-    schema_path = os.path.join(os.path.dirname(__file__), "..", "json_schema", "config.schema.json")
+    schema_path = os.path.join(
+        os.path.dirname(__file__), "..", "json_schema", "config.schema.json"
+    )
     try:
         with open(schema_path, "r", encoding="utf-8") as f:
             schema_data = json.load(f)
@@ -108,10 +110,9 @@ def validate_config(cfg: Dict[str, Any]) -> None:
 
     try:
         validate(instance=cfg, schema=schema_data)
-    except ValidationError as e:
+    except ValidationError:
         # Re-raise with clearer message
         raise
-
 
 
 if __name__ == "__main__":

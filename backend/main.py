@@ -9,8 +9,8 @@ _PROJECT_ROOT = os.path.dirname(_BACKEND_DIR)
 if _PROJECT_ROOT not in sys.path:
     sys.path.append(_PROJECT_ROOT)
 
-from backend.utils.logger import logger
-from backend.core.orchestrator import Orchestrator
+from backend.utils.logger import logger  # noqa: E402
+from backend.core.orchestrator import Orchestrator  # noqa: E402
 
 # Ce code applique le Plan V5 du projet de tri d’emails LLM, avec conformité RGPD et sécurité renforcée.
 # Pour toute hypothèse technique non vérifiée, voir les TODO dans le code.

@@ -3,11 +3,14 @@ import json
 import struct
 import os
 
-# Ajout du chemin courant au path pour les imports relatifs si nécessaire
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Ensure the project root is on sys.path so we can import the `backend` package.
+_BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.dirname(_BACKEND_DIR)
+if _PROJECT_ROOT not in sys.path:
+    sys.path.append(_PROJECT_ROOT)
 
-from utils.logger import logger
-from core.orchestrator import Orchestrator
+from backend.utils.logger import logger
+from backend.core.orchestrator import Orchestrator
 
 # Ce code applique le Plan V5 du projet de tri d’emails LLM, avec conformité RGPD et sécurité renforcée.
 # Pour toute hypothèse technique non vérifiée, voir les TODO dans le code.

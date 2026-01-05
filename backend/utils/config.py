@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from .logger import logger
 
@@ -33,7 +33,7 @@ def _default_config_path() -> str:
     return os.path.join(base_dir, "config.json")
 
 
-def load_config(path: str = None) -> Dict[str, Any]:
+def load_config(path: Optional[str] = None) -> Dict[str, Any]:
     """Load configuration from JSON with sensible fallbacks.
 
     Returns a dictionary with configuration values. Raises FileNotFoundError only
@@ -88,8 +88,7 @@ def validate_config(cfg: Dict[str, Any]) -> None:
 
     TODO: Cache schema loading for performance.
     """
-    from jsonschema import validate, ValidationError
-    import json
+    from jsonschema import ValidationError, validate
 
     if not isinstance(cfg, dict):
         raise ValueError("Configuration must be a JSON object/dict")

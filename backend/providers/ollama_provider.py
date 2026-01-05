@@ -1,5 +1,4 @@
 import requests
-
 from typing import List, Optional
 from .base import LLMProvider
 from ..utils.logger import logger

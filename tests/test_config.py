@@ -1,10 +1,7 @@
 import os
-import json
 import tempfile
-import shutil
 
 from backend.utils.config import load_config, validate_config
-from jsonschema import ValidationError
 
 
 def test_load_default_config(monkeypatch, tmp_path):
@@ -20,16 +17,14 @@ def test_validate_good_config(tmp_path):
     cfg = {
         "provider": "ollama",
         "analysis_mode": "full",
-        "batch_mode": {"enabled": False}
+        "batch_mode": {"enabled": False},
     }
     # Should not raise
     validate_config(cfg)
 
 
 def test_validate_bad_config(tmp_path):
-    cfg = {
-        "analysis_mode": "invalid"
-    }
+    cfg = {"analysis_mode": "invalid"}
     try:
         validate_config(cfg)
         assert False, "Validation should have failed"

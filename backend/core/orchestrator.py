@@ -6,6 +6,7 @@ from ..utils.logger import logger
 # Pour toute hypothèse technique non vérifiée, voir les TODO dans le code.
 # Toute modification doit être validée par audit RGPD et revue technique.
 
+
 class Orchestrator:
     """
     Coordonne le flux de traitement : Réception -> Privacy -> LLM -> Réponse.
@@ -13,25 +14,25 @@ class Orchestrator:
 
     def __init__(self):
         self.privacy_guard = PrivacyGuard()
-        
+
         # TODO: Charger la config depuis un fichier JSON (backend/config.json)
         # Pour l'instant, on hardcode Ollama par défaut comme demandé (Local First)
-        self.provider = OllamaProvider() 
-        
+        self.provider = OllamaProvider()
+
         # Cache simple pour éviter de spammer le health check
-        self.is_provider_healthy = True 
+        self.is_provider_healthy = True
 
     def handle_message(self, message: dict) -> dict:
         """
         Traite un message JSON venant de l'extension.
         """
-        msg_type = message.get('type')
-        payload = message.get('payload', {})
+        msg_type = message.get("type")
+        payload = message.get("payload", {})
 
-        if msg_type == 'ping':
+        if msg_type == "ping":
             return {"type": "pong", "status": "ok"}
 
-        if msg_type == 'classify':
+        if msg_type == "classify":
             return self._handle_classify(payload)
 
         return {"status": "error", "error": "Unknown message type"}
@@ -40,10 +41,10 @@ class Orchestrator:
         """
         Logique de classification.
         """
-        email_id = payload.get('id')
-        subject = payload.get('subject', '')
-        body = payload.get('body', '')
-        folders = payload.get('folders', [])
+        email_id = payload.get("id")
+        subject = payload.get("subject", "")
+        body = payload.get("body", "")
+        folders = payload.get("folders", [])
 
         logger.info(f"Processing email ID: {email_id}")
 
@@ -64,15 +65,7 @@ class Orchestrator:
 
         if target_folder:
             logger.info(f"Decision for {email_id}: Move to '{target_folder}'")
-            return {
-                "id": email_id,
-                "action": "move",
-                "target": target_folder
-            }
+            return {"id": email_id, "action": "move", "target": target_folder}
         else:
             logger.info(f"No decision for {email_id}. Keeping in Inbox.")
-            return {
-                "id": email_id,
-                "action": "none",
-                "reason": "uncertainty_or_error"
-            }
+            return {"id": email_id, "action": "none", "reason": "uncertainty_or_error"}

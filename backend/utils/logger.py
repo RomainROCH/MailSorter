@@ -7,6 +7,7 @@ from logging.handlers import RotatingFileHandler
 # Pour toute hypothèse technique non vérifiée, voir les TODO dans le code.
 # Toute modification doit être validée par audit RGPD et revue technique.
 
+
 def setup_logger(name="MailSorter"):
     """
     Configure un logger qui écrit dans un fichier et stderr.
@@ -22,11 +23,15 @@ def setup_logger(name="MailSorter"):
     logger.setLevel(logging.INFO)
 
     # Format
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
 
     # File Handler (Rotating)
     # Max 5MB, keep 3 backups
-    file_handler = RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=3, encoding='utf-8')
+    file_handler = RotatingFileHandler(
+        log_file, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"
+    )
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
@@ -36,5 +41,6 @@ def setup_logger(name="MailSorter"):
     logger.addHandler(stream_handler)
 
     return logger
+
 
 logger = setup_logger()

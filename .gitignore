@@ -85,3 +85,10 @@ yarn-error.log*
 # Testing
 coverage/
 .nyc_output/
+
+# Security - Secrets
+secrets.json
+*.pem
+*.key
+*.sqlite3
+local_settings.py

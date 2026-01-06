@@ -1,18 +1,55 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "MailSorter Configuration",
-  "description": "Configuration schema for MailSorter with GDPR and security options",
+  "description": "Configuration schema for MailSorter with GDPR, security, and Phase 4 Intelligence options",
   "type": "object",
   "required": ["provider"],
   "properties": {
     "provider": {
       "type": "string",
-      "description": "Active LLM provider (ollama, openai, anthropic, gemini)"
+      "enum": ["ollama", "openai", "anthropic", "gemini"],
+      "default": "ollama",
+      "description": "Active LLM provider. Ollama is local/free, others are cloud/paid."
     },
     "providers": {
       "type": "object",
       "description": "Provider-specific configurations",
-      "additionalProperties": {"type": "object"}
+      "properties": {
+        "ollama": {
+          "type": "object",
+          "properties": {
+            "base_url": {"type": "string", "default": "http://localhost:11434"},
+            "model": {"type": "string", "default": "llama3"},
+            "timeout": {"type": "integer", "minimum": 5, "default": 30}
+          }
+        },
+        "openai": {
+          "type": "object",
+          "properties": {
+            "model": {"type": "string", "default": "gpt-4o-mini"},
+            "base_url": {"type": "string", "default": "https://api.openai.com/v1"},
+            "timeout": {"type": "integer", "minimum": 5, "default": 30},
+            "max_tokens": {"type": "integer", "minimum": 50, "default": 150},
+            "temperature": {"type": "number", "minimum": 0, "maximum": 2, "default": 0.1}
+          }
+        },
+        "anthropic": {
+          "type": "object",
+          "properties": {
+            "model": {"type": "string", "default": "claude-3-haiku-20240307"},
+            "timeout": {"type": "integer", "minimum": 5, "default": 30},
+            "max_tokens": {"type": "integer", "minimum": 50, "default": 150}
+          }
+        },
+        "gemini": {
+          "type": "object",
+          "properties": {
+            "model": {"type": "string", "default": "gemini-1.5-flash"},
+            "timeout": {"type": "integer", "minimum": 5, "default": 30},
+            "max_tokens": {"type": "integer", "minimum": 50, "default": 150}
+          }
+        }
+      }
     },
     "analysis_mode": {
       "type": "string",
@@ -22,8 +59,9 @@
     },
     "thresholds": {
       "type": "object",
-      "description": "Confidence thresholds per folder (0.0-1.0)",
-      "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1}
+      "description": "V5-005: Confidence thresholds per folder (0.0-1.0). Higher = stricter.",
+      "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1},
+      "examples": [{"Spam": 0.8, "Trash": 0.9, "Invoices": 0.7}]
     },
     "log_level": {
       "type": "string",
@@ -32,12 +70,80 @@
     },
     "batch_mode": {
       "type": "object",
-      "description": "Batch processing configuration",
+      "description": "V5-015: Batch processing configuration",
       "properties": {
-        "enabled": {"type": "boolean"},
-        "provider": {"type": "string"}
+        "enabled": {"type": "boolean", "default": false},
+        "batch_size": {"type": "integer", "minimum": 1, "default": 50},
+        "batch_delay": {"type": "number", "minimum": 0, "default": 0.5},
+        "max_concurrent": {"type": "integer", "minimum": 1, "default": 1}
       },
       "required": ["enabled"]
+    },
+    "intelligence": {
+      "type": "object",
+      "description": "Phase 4 Intelligence & Adaptation settings",
+      "properties": {
+        "smart_cache": {
+          "type": "object",
+          "description": "Cost optimization caching",
+          "properties": {
+            "enabled": {"type": "boolean", "default": true},
+            "sender_ttl": {"type": "integer", "description": "Sender cache TTL in seconds", "default": 604800},
+            "hash_ttl": {"type": "integer", "description": "Content hash TTL in seconds", "default": 86400},
+            "min_confidence": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.7},
+            "use_default_rules": {"type": "boolean", "default": true},
+            "rules": {
+              "type": "array",
+              "description": "Custom classification rules",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pattern": {"type": "string", "description": "Regex pattern"},
+                  "folder": {"type": "string", "description": "Target folder"},
+                  "field": {"type": "string", "enum": ["subject", "sender", "body"], "default": "subject"},
+                  "confidence": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.9}
+                },
+                "required": ["pattern", "folder"]
+              }
+            }
+          }
+        },
+        "circuit_breaker": {
+          "type": "object",
+          "description": "AUDIT-003: Provider resilience",
+          "properties": {
+            "failure_threshold": {"type": "integer", "minimum": 1, "default": 3},
+            "recovery_timeout": {"type": "integer", "minimum": 1, "default": 30}
+          }
+        },
+        "calibration": {
+          "type": "object",
+          "description": "INT-003: Confidence calibration",
+          "properties": {
+            "enabled": {"type": "boolean", "default": true},
+            "auto_adjust": {"type": "boolean", "default": false},
+            "min_samples": {"type": "integer", "minimum": 10, "default": 50}
+          }
+        },
+        "prompts": {
+          "type": "object",
+          "description": "INT-002, INT-004: Prompt configuration",
+          "properties": {
+            "language": {"type": "string", "enum": ["auto", "en", "fr", "de", "es"], "default": "auto"},
+            "templates_dir": {"type": "string", "description": "Custom templates directory"}
+          }
+        }
+      }
+    },
+    "feedback_loop": {
+      "type": "object",
+      "description": "V5-008: Ollama fine-tuning feedback (opt-in, GDPR)",
+      "properties": {
+        "enabled": {"type": "boolean", "default": false},
+        "consent_given": {"type": "boolean", "default": false, "description": "Explicit user consent"},
+        "min_samples": {"type": "integer", "minimum": 10, "default": 100},
+        "max_entries": {"type": "integer", "minimum": 100, "default": 10000}
+      }
     },
     "security": {
       "type": "object",

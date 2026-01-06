@@ -77,7 +77,8 @@ class CircuitBreaker:
         self.success_threshold = success_threshold
         
         self._circuits: Dict[str, CircuitStats] = {}
-        self._lock = threading.Lock()
+        # Use reentrant lock to allow nested calls to get_state/get_stats without deadlock
+        self._lock = threading.RLock()
     
     def get_state(self, provider: str) -> CircuitState:
         """
@@ -113,22 +114,26 @@ class CircuitBreaker:
     def record_success(self, provider: str) -> None:
         """
         Record a successful call.
-        
-        In HALF_OPEN state, may transition to CLOSED.
-        In CLOSED state, resets failure counter.
+
+        Ensures any open->half_open time-based transitions are applied
+        prior to handling the success so that a success after recovery
+        timeout correctly closes the circuit.
         """
         with self._lock:
+            # Ensure state reflects any elapsed recovery timeout
+            _ = self.get_state(provider)
+
             stats = self._circuits.get(provider, CircuitStats())
             stats.successes += 1
             stats.last_success = time.time()
             stats.total_calls += 1
             stats.failures = 0  # Reset consecutive failure count
-            
+
             if stats.state == CircuitState.HALF_OPEN:
                 if stats.successes >= self.success_threshold:
                     stats.state = CircuitState.CLOSED
                     logger.info(f"Circuit CLOSED for {provider} (recovered)")
-            
+
             self._circuits[provider] = stats
     
     def record_failure(self, provider: str) -> None:

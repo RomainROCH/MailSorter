@@ -365,6 +365,101 @@
       "expected_folder": "Inbox",
       "difficulty": "easy",
       "language": "en"
+    },
+    {
+      "id": "email_041",
+      "sender": "security@paypal-verify.com",
+      "subject": "Action Required: Verify your PayPal account",
+      "body": "Dear customer, Your account has been limited. Click here to verify your identity and restore access. Act now to avoid suspension.",
+      "expected_folder": "Spam",
+      "difficulty": "hard",
+      "language": "en",
+      "notes": "Phishing attempt - looks like legitimate security email"
+    },
+    {
+      "id": "email_042",
+      "sender": "newsletter@bank.com",
+      "subject": "Your monthly statement is ready",
+      "body": "Your January statement is now available. Log in to view your account activity and download your statement PDF.",
+      "expected_folder": "Invoices",
+      "difficulty": "hard",
+      "language": "en",
+      "notes": "Bank statement - could be Invoices or Inbox"
+    },
+    {
+      "id": "email_043",
+      "sender": "friend@personal.com",
+      "subject": "Check out this newsletter I found!",
+      "body": "Hey! I found this amazing tech newsletter you might like. The link is attached. Let me know what you think!",
+      "expected_folder": "Inbox",
+      "difficulty": "hard",
+      "language": "en",
+      "notes": "Personal email mentioning newsletter - should be Inbox not Newsletters"
+    },
+    {
+      "id": "email_044",
+      "sender": "support@company.com",
+      "subject": "Invoice attached: Support subscription renewal",
+      "body": "Thank you for renewing your support subscription. Invoice #12345 is attached. Contact support if you have questions.",
+      "expected_folder": "Invoices",
+      "difficulty": "hard",
+      "language": "en",
+      "notes": "Support email with invoice - invoice takes priority"
+    },
+    {
+      "id": "email_045",
+      "sender": "shipping@usps.com",
+      "subject": "Your package delivery failed",
+      "body": "Delivery attempted but failed. Click here to reschedule. Your tracking number: 1Z999AA10123456784",
+      "expected_folder": "Shipping",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_046",
+      "sender": "kontakt@deutsche-post.de",
+      "subject": "Ihre Sendung ist unterwegs",
+      "body": "Guten Tag, Ihre Sendung mit der Nummer 123456789 ist auf dem Weg. Voraussichtliche Lieferung: morgen.",
+      "expected_folder": "Shipping",
+      "difficulty": "medium",
+      "language": "de"
+    },
+    {
+      "id": "email_047",
+      "sender": "soporte@empresa.es",
+      "subject": "Su ticket de soporte #7890",
+      "body": "Hemos recibido su solicitud. Un agente se pondrá en contacto con usted pronto. Ticket: #7890",
+      "expected_folder": "Support",
+      "difficulty": "medium",
+      "language": "es"
+    },
+    {
+      "id": "email_048",
+      "sender": "admin@internal.company.com",
+      "subject": "URGENT: System maintenance tonight",
+      "body": "All systems will be down for maintenance from 11pm to 3am. Please save your work. Contact IT for questions.",
+      "expected_folder": "Inbox",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_049",
+      "sender": "no-reply@facebook.com",
+      "subject": "You have 5 new friend requests",
+      "body": "People are trying to connect with you on Facebook. See your pending friend requests and respond.",
+      "expected_folder": "Social",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_050",
+      "sender": "deals@retailstore.com",
+      "subject": "🔥 Flash Sale: 70% off everything!",
+      "body": "Limited time offer! 70% off all items. Shop now before stock runs out. Free shipping on orders over $50.",
+      "expected_folder": "Spam",
+      "difficulty": "medium",
+      "language": "en",
+      "notes": "Promotional spam - aggressive marketing"
     }
   ]
 }

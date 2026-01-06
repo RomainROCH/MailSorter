@@ -20,7 +20,8 @@ class TestSmartCache:
             "hash_cache_enabled": True,
             "sender_cache_ttl": 86400,  # 1 day for testing
             "hash_cache_ttl": 3600,      # 1 hour for testing
-            "max_entries": 100
+            "max_entries": 100,
+            "use_default_rules": False   # Don't load default rules for testing
         })
     
     def test_disabled_cache(self):

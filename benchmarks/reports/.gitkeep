@@ -1,0 +1,5 @@
+# Benchmark reports are stored here
+# Reports are auto-generated with timestamps
+*.json
+*.md
+!.gitkeep

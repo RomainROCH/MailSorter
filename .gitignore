@@ -85,3 +85,15 @@ yarn-error.log*
 # Testing
 coverage/
 .nyc_output/
+
+# Benchmark Reports (auto-generated)
+benchmarks/reports/*.json
+benchmarks/reports/*.md
+!benchmarks/reports/.gitkeep
+
+# Security - Secrets
+secrets.json
+*.pem
+*.key
+*.sqlite3
+local_settings.py

@@ -19,6 +19,7 @@ Conçu avec une approche "Privacy First" et une architecture robuste (WebExtensi
 *   Thunderbird 115+ ou Betterbird.
 *   Python 3.10+.
 *   Ollama (pour le mode local) installé et tournant (`ollama serve`).
+*   **Sur Windows : pour le développement et l'exécution des tests, exécuter l'environnement dans WSL (ex : Ubuntu).**
 
 ## Installation
 

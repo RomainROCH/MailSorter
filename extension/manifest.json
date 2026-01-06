@@ -15,8 +15,9 @@
     "nativeMessaging",
     "storage"
   ],
+  "content_security_policy": "script-src 'self'; object-src 'self'",
   "background": {
-    "scripts": ["background/native_client.js", "background/background.js"]
+    "scripts": ["background/feature_detection.js", "background/error_handler.js", "background/native_client.js", "background/background.js"]
   },
   "options_ui": {
     "page": "options/options.html",

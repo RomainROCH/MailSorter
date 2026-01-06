@@ -52,3 +52,17 @@ Le système applique une politique stricte de minimisation **avant** tout traite
 - [ ] **Audits réguliers** : Logs, revue des décisions du modèle.
 - [x] **Droit d'opposition** : Possibilité de désactiver le tri automatique (Mode Passif).
 - [ ] **DPIA** : Si déploiement professionnel > 10 utilisateurs ou données sensibles.
+
+## 8. Audit des Permissions Extension (manifest.json)
+Les permissions déclarées dans `extension/manifest.json` sont strictement nécessaires au fonctionnement :
+
+| Permission | Justification |
+|------------|---------------|
+| `messagesRead` | Lecture des emails pour analyse (métadonnées et corps). |
+| `messagesModify` | Déplacement des emails vers le dossier cible après classification. |
+| `accountsRead` | Récupération des comptes disponibles pour afficher les dossiers. |
+| `foldersRead` | Listage des dossiers pour proposer les cibles de tri. |
+| `nativeMessaging` | Communication sécurisée (stdio) avec le backend Python local. |
+| `storage` | Stockage des préférences utilisateur (seuils, provider sélectionné). |
+
+**Conclusion** : Aucune permission superflue. Pas de `<all_urls>`, pas de `tabs`, pas d'accès réseau externe direct.

@@ -1,24 +1,82 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "MailSorter Configuration",
+  "description": "Configuration schema for MailSorter with GDPR and security options",
   "type": "object",
   "required": ["provider"],
   "properties": {
-    "provider": {"type": "string"},
+    "provider": {
+      "type": "string",
+      "description": "Active LLM provider (ollama, openai, anthropic, gemini)"
+    },
     "providers": {
       "type": "object",
+      "description": "Provider-specific configurations",
       "additionalProperties": {"type": "object"}
     },
-    "analysis_mode": {"type": "string", "enum": ["full", "headers_only"]},
-    "thresholds": {"type": "object", "additionalProperties": {"type": "number"}},
-    "log_level": {"type": "string", "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]},
+    "analysis_mode": {
+      "type": "string",
+      "enum": ["full", "headers_only"],
+      "default": "full",
+      "description": "V5-004: headers_only excludes email body from LLM for maximum privacy"
+    },
+    "thresholds": {
+      "type": "object",
+      "description": "Confidence thresholds per folder (0.0-1.0)",
+      "additionalProperties": {"type": "number", "minimum": 0, "maximum": 1}
+    },
+    "log_level": {
+      "type": "string",
+      "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+      "default": "INFO"
+    },
     "batch_mode": {
       "type": "object",
+      "description": "Batch processing configuration",
       "properties": {
         "enabled": {"type": "boolean"},
         "provider": {"type": "string"}
       },
       "required": ["enabled"]
+    },
+    "security": {
+      "type": "object",
+      "description": "Security configuration options",
+      "properties": {
+        "hmac_enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "V5-007: Enable HMAC signing of classification results"
+        },
+        "rate_limiting": {
+          "type": "object",
+          "properties": {
+            "enabled": {"type": "boolean", "default": true},
+            "requests_per_minute": {"type": "integer", "minimum": 1, "default": 60}
+          }
+        },
+        "use_presidio": {
+          "type": "boolean",
+          "default": false,
+          "description": "AUDIT-001: Use Microsoft Presidio for enhanced PII detection"
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "description": "GDPR privacy configuration",
+      "properties": {
+        "max_body_length": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 10000,
+          "default": 2000,
+          "description": "Maximum characters to send to LLM (data minimization)"
+        },
+        "redact_emails": {"type": "boolean", "default": true},
+        "redact_phones": {"type": "boolean", "default": true},
+        "redact_names": {"type": "boolean", "default": false}
+      }
     }
   },
   "additionalProperties": false

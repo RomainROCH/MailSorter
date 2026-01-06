@@ -11,6 +11,10 @@ from backend.providers.anthropic_provider import AnthropicProvider
 from backend.providers.gemini_provider import GeminiProvider
 
 
+# Keyring is imported in backend.utils.secrets, not in provider modules
+KEYRING_PATCH = 'backend.utils.secrets.keyring'
+
+
 class TestOpenAIProvider:
     """Tests for OpenAIProvider."""
     
@@ -23,7 +27,7 @@ class TestOpenAIProvider:
             "max_tokens": 150
         }
     
-    @patch('backend.providers.openai_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_init_with_explicit_key(self, mock_keyring):
         """Should use explicit API key."""
         provider = OpenAIProvider(self.config)
@@ -31,7 +35,7 @@ class TestOpenAIProvider:
         assert provider.api_key == "test-key"
         mock_keyring.get_password.assert_not_called()
     
-    @patch('backend.providers.openai_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_init_with_keyring(self, mock_keyring):
         """Should get API key from keyring."""
         mock_keyring.get_password.return_value = "keyring-key"
@@ -43,18 +47,18 @@ class TestOpenAIProvider:
     
     def test_get_name(self):
         """Should return provider name."""
-        with patch('backend.providers.openai_provider.keyring'):
+        with patch(KEYRING_PATCH):
             provider = OpenAIProvider(self.config)
             assert provider.get_name() == "openai"
     
     def test_is_not_local(self):
         """Should not be marked as local."""
-        with patch('backend.providers.openai_provider.keyring'):
+        with patch(KEYRING_PATCH):
             provider = OpenAIProvider(self.config)
             assert provider.is_local is False
     
     @patch('backend.providers.openai_provider.requests')
-    @patch('backend.providers.openai_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_classify_success(self, mock_keyring, mock_requests):
         """Should classify email successfully."""
         mock_response = Mock()
@@ -70,11 +74,10 @@ class TestOpenAIProvider:
         mock_requests.post.return_value = mock_response
         
         provider = OpenAIProvider(self.config)
-        result = provider.classify(
-            sender="invoice@company.com",
+        result = provider.classify_email(
             subject="Your Invoice",
             body="Please find attached your invoice.",
-            folders=["Inbox", "Invoices"]
+            available_folders=["Inbox", "Invoices"]
         )
         
         assert isinstance(result, ClassificationResult)
@@ -83,7 +86,7 @@ class TestOpenAIProvider:
         assert result.tokens_used == 100
     
     @patch('backend.providers.openai_provider.requests')
-    @patch('backend.providers.openai_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_classify_api_error(self, mock_keyring, mock_requests):
         """Should handle API errors."""
         mock_response = Mock()
@@ -94,15 +97,14 @@ class TestOpenAIProvider:
         provider = OpenAIProvider(self.config)
         
         with pytest.raises(Exception):
-            provider.classify(
-                sender="test@test.com",
+            provider.classify_email(
                 subject="Test",
                 body="Test",
-                folders=["Inbox"]
+                available_folders=["Inbox"]
             )
     
     @patch('backend.providers.openai_provider.requests')
-    @patch('backend.providers.openai_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_classify_invalid_json(self, mock_keyring, mock_requests):
         """Should handle invalid JSON response."""
         mock_response = Mock()
@@ -119,14 +121,13 @@ class TestOpenAIProvider:
         
         provider = OpenAIProvider(self.config)
         
-        # Should handle gracefully or raise
-        with pytest.raises(Exception):
-            provider.classify(
-                sender="test@test.com",
-                subject="Test",
-                body="Test",
-                folders=["Inbox"]
-            )
+        # Should handle gracefully and return None when JSON is invalid
+        result = provider.classify_email(
+            subject="Test",
+            body="Test",
+            available_folders=["Inbox"]
+        )
+        assert result is None
 
 
 class TestAnthropicProvider:
@@ -141,20 +142,20 @@ class TestAnthropicProvider:
             "max_tokens": 150
         }
     
-    @patch('backend.providers.anthropic_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_get_name(self, mock_keyring):
         """Should return provider name."""
         provider = AnthropicProvider(self.config)
         assert provider.get_name() == "anthropic"
     
-    @patch('backend.providers.anthropic_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_is_not_local(self, mock_keyring):
         """Should not be marked as local."""
         provider = AnthropicProvider(self.config)
         assert provider.is_local is False
     
     @patch('backend.providers.anthropic_provider.requests')
-    @patch('backend.providers.anthropic_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_classify_success(self, mock_keyring, mock_requests):
         """Should classify email successfully."""
         mock_response = Mock()
@@ -169,11 +170,10 @@ class TestAnthropicProvider:
         mock_requests.post.return_value = mock_response
         
         provider = AnthropicProvider(self.config)
-        result = provider.classify(
-            sender="news@company.com",
+        result = provider.classify_email(
             subject="Weekly Newsletter",
             body="Here's your weekly update.",
-            folders=["Inbox", "Newsletters"]
+            available_folders=["Inbox", "Newsletters"]
         )
         
         assert isinstance(result, ClassificationResult)
@@ -182,7 +182,7 @@ class TestAnthropicProvider:
         assert result.tokens_used == 80
     
     @patch('backend.providers.anthropic_provider.requests')
-    @patch('backend.providers.anthropic_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_uses_correct_api_version(self, mock_keyring, mock_requests):
         """Should use correct Anthropic API version header."""
         mock_response = Mock()
@@ -194,7 +194,7 @@ class TestAnthropicProvider:
         mock_requests.post.return_value = mock_response
         
         provider = AnthropicProvider(self.config)
-        provider.classify("test@test.com", "Test", "Test", ["Inbox"])
+        provider.classify_email("Test", "Test", ["Inbox"])
         
         # Check headers
         call_kwargs = mock_requests.post.call_args
@@ -215,20 +215,20 @@ class TestGeminiProvider:
             "max_tokens": 150
         }
     
-    @patch('backend.providers.gemini_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_get_name(self, mock_keyring):
         """Should return provider name."""
         provider = GeminiProvider(self.config)
         assert provider.get_name() == "gemini"
     
-    @patch('backend.providers.gemini_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_is_not_local(self, mock_keyring):
         """Should not be marked as local."""
         provider = GeminiProvider(self.config)
         assert provider.is_local is False
     
     @patch('backend.providers.gemini_provider.requests')
-    @patch('backend.providers.gemini_provider.keyring')
+    @patch(KEYRING_PATCH)
     def test_classify_success(self, mock_keyring, mock_requests):
         """Should classify email successfully."""
         mock_response = Mock()
@@ -242,17 +242,17 @@ class TestGeminiProvider:
                 }
             }],
             "usageMetadata": {
-                "totalTokenCount": 75
+                "promptTokenCount": 50,
+                "candidatesTokenCount": 25
             }
         }
         mock_requests.post.return_value = mock_response
         
         provider = GeminiProvider(self.config)
-        result = provider.classify(
-            sender="orders@amazon.com",
+        result = provider.classify_email(
             subject="Your order has shipped",
             body="Your package is on the way.",
-            folders=["Inbox", "Shopping"]
+            available_folders=["Inbox", "Shopping"]
         )
         
         assert isinstance(result, ClassificationResult)
@@ -269,24 +269,20 @@ class TestProviderCommon:
         (AnthropicProvider, {"api_key": "test"}),
         (GeminiProvider, {"api_key": "test"}),
     ])
-    def test_supports_streaming_false(self, provider_class, config):
-        """All providers should not support streaming by default."""
-        with patch.object(provider_class, '__init__', lambda self, cfg: None):
-            provider = provider_class.__new__(provider_class)
-            provider.supports_streaming = False
-            
-            assert provider.supports_streaming is False
+    @patch(KEYRING_PATCH)
+    def test_supports_streaming(self, mock_keyring, provider_class, config):
+        """All providers should support streaming."""
+        provider = provider_class(config)
+        # Cloud providers support streaming
+        assert provider.supports_streaming is True
     
-    @pytest.mark.parametrize("provider_class,expected_name", [
-        (OpenAIProvider, "openai"),
-        (AnthropicProvider, "anthropic"),
-        (GeminiProvider, "gemini"),
+    @pytest.mark.parametrize("provider_class,config,expected_name", [
+        (OpenAIProvider, {"api_key": "test"}, "openai"),
+        (AnthropicProvider, {"api_key": "test"}, "anthropic"),
+        (GeminiProvider, {"api_key": "test"}, "gemini"),
     ])
-    def test_provider_names(self, provider_class, expected_name):
+    @patch(KEYRING_PATCH)
+    def test_provider_names(self, mock_keyring, provider_class, config, expected_name):
         """Each provider should have correct name."""
-        with patch.object(provider_class, '__init__', lambda self, cfg: None):
-            provider = provider_class.__new__(provider_class)
-            provider._name = expected_name
-            
-            # Simulate get_name
-            assert provider._name == expected_name
+        provider = provider_class(config)
+        assert provider.get_name() == expected_name

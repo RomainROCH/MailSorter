@@ -20,10 +20,32 @@ class OllamaProvider(LLMProvider):
         self.api_endpoint = f"{base_url}/api/generate"
 
     def health_check(self) -> bool:
+        """
+        Check if Ollama is running and the model is available.
+        Uses the /api/tags endpoint to verify connectivity.
+        """
         try:
-            # TODO: Vérifier l'endpoint exact de health check d'Ollama
-            response = requests.get(self.base_url)
-            return response.status_code == 200
+            # Ollama exposes /api/tags to list available models
+            response = requests.get(f"{self.base_url}/api/tags", timeout=5)
+            if response.status_code != 200:
+                logger.warning(f"Ollama health check returned status {response.status_code}")
+                return False
+            
+            # Optionally verify the configured model is available
+            data = response.json()
+            models = [m.get("name", "").split(":")[0] for m in data.get("models", [])]
+            
+            if self.model not in models and f"{self.model}:latest" not in [m.get("name", "") for m in data.get("models", [])]:
+                logger.warning(f"Model '{self.model}' not found in Ollama. Available: {models}")
+                # Still return True if Ollama is running, just warn about model
+            
+            return True
+        except requests.exceptions.Timeout:
+            logger.warning("Ollama health check timed out")
+            return False
+        except requests.exceptions.ConnectionError:
+            logger.warning("Could not connect to Ollama - is it running?")
+            return False
         except Exception as e:
             logger.warning(f"Ollama Health Check Failed: {e}")
             return False

@@ -1,0 +1,370 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "description": "Labeled email dataset for benchmarking LLM providers",
+    "created": "2026-01-06",
+    "categories": ["Inbox", "Invoices", "Newsletters", "Spam", "Social", "Shipping", "Support"]
+  },
+  "emails": [
+    {
+      "id": "email_001",
+      "sender": "billing@amazon.com",
+      "subject": "Your Amazon.com order #123-4567890 has shipped",
+      "body": "Hello, Your package is on the way! Track your shipment at amazon.com/tracking. Estimated delivery: January 8, 2026.",
+      "expected_folder": "Shipping",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_002",
+      "sender": "noreply@newsletter.techcrunch.com",
+      "subject": "TechCrunch Daily: AI startups raise $5B in Q4",
+      "body": "Today's top stories: 1) AI funding hits new heights 2) Apple announces new product line 3) Startup of the week. Unsubscribe here.",
+      "expected_folder": "Newsletters",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_003",
+      "sender": "invoice@stripe.com",
+      "subject": "Invoice INV-2026-0042 from Stripe",
+      "body": "Your invoice for January 2026 is attached. Amount due: $149.00. Payment due date: January 15, 2026. View invoice online.",
+      "expected_folder": "Invoices",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_004",
+      "sender": "support@zendesk.com",
+      "subject": "Re: Ticket #45678 - Your request has been updated",
+      "body": "Hi, We've updated your support ticket. Our team is working on your issue. Expected resolution: 24-48 hours. Reply to this email for updates.",
+      "expected_folder": "Support",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_005",
+      "sender": "notifications@linkedin.com",
+      "subject": "John Doe viewed your profile",
+      "body": "John Doe, CEO at TechCorp, viewed your profile. See who else viewed you this week. Upgrade to Premium for more insights.",
+      "expected_folder": "Social",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_006",
+      "sender": "prince.nigeria@hotmail.com",
+      "subject": "URGENT: You Have Won $5,000,000 USD!!!",
+      "body": "Dear Friend, You have been selected for $5 million inheritance. Send $500 processing fee to claim. Bank details attached. ACT NOW!",
+      "expected_folder": "Spam",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_007",
+      "sender": "colleague@company.com",
+      "subject": "Meeting tomorrow at 2pm",
+      "body": "Hi, Can we meet tomorrow at 2pm to discuss the Q1 planning? Let me know if that works for you. Thanks!",
+      "expected_folder": "Inbox",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_008",
+      "sender": "factures@edf.fr",
+      "subject": "Votre facture EDF du mois de janvier",
+      "body": "Bonjour, Votre facture d'électricité est disponible. Montant: 87,50€. Date limite de paiement: 20 janvier 2026. Consultez votre espace client.",
+      "expected_folder": "Invoices",
+      "difficulty": "medium",
+      "language": "fr"
+    },
+    {
+      "id": "email_009",
+      "sender": "newsletter@lemonde.fr",
+      "subject": "La Matinale du Monde - 6 janvier 2026",
+      "body": "Les actualités du jour: politique, économie, culture. Se désabonner de cette newsletter.",
+      "expected_folder": "Newsletters",
+      "difficulty": "medium",
+      "language": "fr"
+    },
+    {
+      "id": "email_010",
+      "sender": "rechnung@telekom.de",
+      "subject": "Ihre Rechnung für Januar 2026",
+      "body": "Guten Tag, Ihre monatliche Rechnung ist bereit. Betrag: 49,99€. Zahlungsfrist: 25. Januar 2026. Mit freundlichen Grüßen.",
+      "expected_folder": "Invoices",
+      "difficulty": "medium",
+      "language": "de"
+    },
+    {
+      "id": "email_011",
+      "sender": "promotions@bestbuy.com",
+      "subject": "Flash Sale! 50% off electronics - Today Only",
+      "body": "Don't miss out! Huge discounts on TVs, laptops, and more. Free shipping on orders over $35. Shop now before it's gone!",
+      "expected_folder": "Newsletters",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_012",
+      "sender": "shipping@fedex.com",
+      "subject": "FedEx Shipment 789456123 Delivery Exception",
+      "body": "Delivery attempted but recipient not available. Package held at local facility. Schedule redelivery or pickup at fedex.com.",
+      "expected_folder": "Shipping",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_013",
+      "sender": "hr@company.com",
+      "subject": "Action Required: Complete your annual benefits enrollment",
+      "body": "Open enrollment ends January 15. Please review and update your health insurance and 401k selections. Contact HR with questions.",
+      "expected_folder": "Inbox",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_014",
+      "sender": "unknown@suspicious-domain.xyz",
+      "subject": "Your account has been compromised - verify now",
+      "body": "We detected unusual activity. Click here to verify your identity immediately or your account will be suspended. This is urgent!",
+      "expected_folder": "Spam",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_015",
+      "sender": "notifications@twitter.com",
+      "subject": "You have 5 new followers this week",
+      "body": "See who followed you: @user1, @user2, and 3 others. Check out their profiles and follow back.",
+      "expected_folder": "Social",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_016",
+      "sender": "mom@gmail.com",
+      "subject": "Photos from Christmas dinner",
+      "body": "Hi sweetie! Here are the photos from last week. Everyone looked so happy. Call me when you get a chance. Love, Mom",
+      "expected_folder": "Inbox",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_017",
+      "sender": "noreply@github.com",
+      "subject": "[MailSorter] New pull request: Feature/phase4",
+      "body": "RomainROCH opened a pull request. Review requested. 28 files changed, 6268 insertions. View on GitHub.",
+      "expected_folder": "Inbox",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_018",
+      "sender": "team@slack.com",
+      "subject": "Daily digest: 47 messages in #engineering",
+      "body": "You missed 47 messages in #engineering, 12 in #random. Top threads: deployment issues, Friday social. Open Slack to catch up.",
+      "expected_folder": "Inbox",
+      "difficulty": "hard",
+      "language": "en"
+    },
+    {
+      "id": "email_019",
+      "sender": "receipts@uber.com",
+      "subject": "Your Tuesday evening trip with Uber",
+      "body": "Thanks for riding with Uber. Trip from Downtown to Airport. Total: $34.50. Rate your driver. Download receipt.",
+      "expected_folder": "Invoices",
+      "difficulty": "hard",
+      "language": "en"
+    },
+    {
+      "id": "email_020",
+      "sender": "deals@groupon.com",
+      "subject": "70% off spa treatments near you!",
+      "body": "Exclusive deal: Full body massage + facial for only $49. Limited availability. Book now before it sells out. Unsubscribe.",
+      "expected_folder": "Newsletters",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_021",
+      "sender": "security@paypal.com",
+      "subject": "Confirm your recent transaction",
+      "body": "A payment of $299.99 was sent to MERCHANT_NAME. If you didn't make this transaction, report it immediately via the PayPal app.",
+      "expected_folder": "Inbox",
+      "difficulty": "hard",
+      "language": "en"
+    },
+    {
+      "id": "email_022",
+      "sender": "no-reply@booking.com",
+      "subject": "Confirmation: Hotel reservation in Paris",
+      "body": "Your booking is confirmed. Hotel Le Marais, Jan 20-23. Total: €450. Check-in from 3pm. Print this confirmation.",
+      "expected_folder": "Inbox",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_023",
+      "sender": "winner-claim@lottery-intl.net",
+      "subject": "Congratulations! You've been selected!",
+      "body": "Your email was randomly selected in our monthly draw. Claim €1,000,000 by replying with your full name and bank details.",
+      "expected_folder": "Spam",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_024",
+      "sender": "dhl-tracking@dhl.com",
+      "subject": "Your DHL Express shipment is out for delivery",
+      "body": "Shipment 1234567890 is out for delivery today. Expected by 5pm. Track live at dhl.com. Delivery signature required.",
+      "expected_folder": "Shipping",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_025",
+      "sender": "boss@company.com",
+      "subject": "Quick question about the project",
+      "body": "Hey, do you have a minute? I wanted to discuss the timeline for the Q2 deliverables. Let's sync up today if possible.",
+      "expected_folder": "Inbox",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_026",
+      "sender": "noreply@medium.com",
+      "subject": "Daily Digest: Stories for you",
+      "body": "Based on your reading history: 'The Future of AI', 'Productivity Hacks', 'Why Remote Work is Here to Stay'. Unsubscribe.",
+      "expected_folder": "Newsletters",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_027",
+      "sender": "facebook@facebookmail.com",
+      "subject": "You have memories to look back on today",
+      "body": "On this day 3 years ago, you shared a post. See your memories. Also: 2 friend suggestions and 5 notifications.",
+      "expected_folder": "Social",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_028",
+      "sender": "helpdesk@company.com",
+      "subject": "IT Maintenance: Scheduled downtime Saturday",
+      "body": "Planned maintenance this Saturday 2-4am. Email and VPN may be unavailable. No action required. Contact IT for questions.",
+      "expected_folder": "Inbox",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_029",
+      "sender": "pharmacy@cvs.com",
+      "subject": "Prescription ready for pickup",
+      "body": "Your prescription is ready at CVS #1234. Pickup hours: 9am-9pm. Bring valid ID. Questions? Call the pharmacy.",
+      "expected_folder": "Inbox",
+      "difficulty": "hard",
+      "language": "en"
+    },
+    {
+      "id": "email_030",
+      "sender": "alerts@bank.com",
+      "subject": "Your credit card statement is ready",
+      "body": "Your January statement is available. Balance: $1,234.56. Minimum payment: $25. Due date: Jan 25. View statement online.",
+      "expected_folder": "Invoices",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_031",
+      "sender": "service@netflix.com",
+      "subject": "Your Netflix membership renewal",
+      "body": "Your subscription renewed for €13.99/month. Next billing date: Feb 6. Manage your plan in account settings.",
+      "expected_folder": "Invoices",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_032",
+      "sender": "john.smith@consulting-firm.com",
+      "subject": "Proposal for Q2 engagement",
+      "body": "Hi, Attached is our proposal for the Q2 consulting engagement. Happy to discuss on a call. Best regards, John",
+      "expected_folder": "Inbox",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_033",
+      "sender": "noreply@instagram.com",
+      "subject": "jane_doe started following you",
+      "body": "jane_doe (@jane_doe) started following you. See their profile and follow back.",
+      "expected_folder": "Social",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_034",
+      "sender": "support@spotify.com",
+      "subject": "Your Spotify payment failed",
+      "body": "We couldn't process your payment. Update your payment method to avoid service interruption. Current status: Past due.",
+      "expected_folder": "Support",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_035",
+      "sender": "spam@random-promo.biz",
+      "subject": "Make $10,000/week working from home!!!",
+      "body": "Guaranteed income! No experience needed! Join thousands earning from home. Limited spots! Sign up now! This is not a scam!",
+      "expected_folder": "Spam",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_036",
+      "sender": "noreply@dropbox.com",
+      "subject": "File shared with you: Q4_Report.pdf",
+      "body": "Alice shared 'Q4_Report.pdf' with you. View the file in Dropbox. You can also download it directly.",
+      "expected_folder": "Inbox",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_037",
+      "sender": "orders@apple.com",
+      "subject": "Your order has been delivered",
+      "body": "Great news! Your order containing iPhone 15 Pro was delivered today. Rate your experience. Need help? Contact Apple Support.",
+      "expected_folder": "Shipping",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_038",
+      "sender": "newsletter@producthunt.com",
+      "subject": "🚀 Product Hunt Daily - Top 5 launches today",
+      "body": "Today's top products: 1) AI Writing Tool 2) Productivity App 3) Developer Tools... See all 15 new launches. Unsubscribe.",
+      "expected_folder": "Newsletters",
+      "difficulty": "easy",
+      "language": "en"
+    },
+    {
+      "id": "email_039",
+      "sender": "dentist@smile-dental.com",
+      "subject": "Reminder: Dental appointment tomorrow",
+      "body": "This is a reminder for your dental checkup tomorrow at 10am. Please arrive 10 minutes early. Call to reschedule if needed.",
+      "expected_folder": "Inbox",
+      "difficulty": "medium",
+      "language": "en"
+    },
+    {
+      "id": "email_040",
+      "sender": "contact@client-company.com",
+      "subject": "Re: Project timeline update",
+      "body": "Thanks for the update. The new timeline works for us. Let's proceed with the revised plan. Looking forward to the kickoff.",
+      "expected_folder": "Inbox",
+      "difficulty": "easy",
+      "language": "en"
+    }
+  ]
+}

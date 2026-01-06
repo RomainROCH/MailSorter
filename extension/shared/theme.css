@@ -1,0 +1,269 @@
+/**
+ * MailSorter Theme System
+ * CSS Variables for consistent theming across all UI components
+ * Follows Thunderbird's Photon design system
+ */
+
+:root {
+  /* =========================
+     Colors - Light Mode
+     ========================= */
+  
+  /* Primary */
+  --ms-color-primary: #0060df;
+  --ms-color-primary-hover: #003eaa;
+  --ms-color-primary-active: #002275;
+  --ms-color-primary-light: #e6f0ff;
+  
+  /* Status */
+  --ms-color-success: #058b00;
+  --ms-color-success-light: #e6ffe6;
+  --ms-color-warning: #d76e00;
+  --ms-color-warning-light: #fff4e6;
+  --ms-color-error: #d70022;
+  --ms-color-error-light: #ffe6e9;
+  --ms-color-info: #0090ed;
+  --ms-color-info-light: #e6f7ff;
+  
+  /* Text */
+  --ms-color-text: #15141a;
+  --ms-color-text-secondary: #5b5b66;
+  --ms-color-text-disabled: #8f8f9d;
+  --ms-color-text-on-primary: #ffffff;
+  --ms-color-text-link: #0060df;
+  
+  /* Surfaces */
+  --ms-color-background: #ffffff;
+  --ms-color-surface: #f0f0f4;
+  --ms-color-surface-hover: #e0e0e6;
+  --ms-color-surface-active: #cfcfd8;
+  --ms-color-border: #cfcfd8;
+  --ms-color-border-strong: #8f8f9d;
+  
+  /* Status Indicators (UX-008) */
+  --ms-status-connected: #058b00;
+  --ms-status-disconnected: #d70022;
+  --ms-status-processing: #0060df;
+  --ms-status-warning: #d76e00;
+  
+  /* =========================
+     Spacing Scale
+     ========================= */
+  --ms-space-2xs: 2px;
+  --ms-space-xs: 4px;
+  --ms-space-sm: 8px;
+  --ms-space-md: 16px;
+  --ms-space-lg: 24px;
+  --ms-space-xl: 32px;
+  --ms-space-2xl: 48px;
+  
+  /* =========================
+     Typography
+     ========================= */
+  --ms-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --ms-font-family-mono: "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Fira Mono", "Droid Sans Mono", monospace;
+  
+  --ms-font-size-xs: 11px;
+  --ms-font-size-sm: 12px;
+  --ms-font-size-md: 14px;
+  --ms-font-size-lg: 16px;
+  --ms-font-size-xl: 20px;
+  --ms-font-size-2xl: 24px;
+  
+  --ms-font-weight-normal: 400;
+  --ms-font-weight-medium: 500;
+  --ms-font-weight-bold: 600;
+  
+  --ms-line-height-tight: 1.2;
+  --ms-line-height-normal: 1.5;
+  --ms-line-height-relaxed: 1.75;
+  
+  /* =========================
+     Borders & Shadows
+     ========================= */
+  --ms-radius-sm: 4px;
+  --ms-radius-md: 8px;
+  --ms-radius-lg: 12px;
+  --ms-radius-full: 9999px;
+  
+  --ms-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --ms-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --ms-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+  
+  /* =========================
+     Animation
+     ========================= */
+  --ms-transition-fast: 150ms ease;
+  --ms-transition-normal: 250ms ease;
+  --ms-transition-slow: 400ms ease;
+  
+  /* =========================
+     Focus (A11Y-001)
+     ========================= */
+  --ms-focus-outline: 2px solid var(--ms-color-primary);
+  --ms-focus-offset: 2px;
+  
+  /* =========================
+     Z-Index Scale
+     ========================= */
+  --ms-z-dropdown: 100;
+  --ms-z-modal: 200;
+  --ms-z-toast: 300;
+  --ms-z-tooltip: 400;
+}
+
+/* =========================
+   Dark Mode (UX-004)
+   ========================= */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Primary */
+    --ms-color-primary: #0a84ff;
+    --ms-color-primary-hover: #0060df;
+    --ms-color-primary-active: #003eaa;
+    --ms-color-primary-light: #002275;
+    
+    /* Status */
+    --ms-color-success: #30e60b;
+    --ms-color-success-light: #002b00;
+    --ms-color-warning: #ff9f1a;
+    --ms-color-warning-light: #3d2800;
+    --ms-color-error: #ff4f5e;
+    --ms-color-error-light: #3d0007;
+    --ms-color-info: #00ddff;
+    --ms-color-info-light: #003d47;
+    
+    /* Text */
+    --ms-color-text: #fbfbfe;
+    --ms-color-text-secondary: #b1b1b3;
+    --ms-color-text-disabled: #737373;
+    --ms-color-text-on-primary: #ffffff;
+    --ms-color-text-link: #0a84ff;
+    
+    /* Surfaces */
+    --ms-color-background: #1c1b22;
+    --ms-color-surface: #2b2a33;
+    --ms-color-surface-hover: #38373f;
+    --ms-color-surface-active: #4a4a4f;
+    --ms-color-border: #52525e;
+    --ms-color-border-strong: #8f8f9d;
+    
+    /* Status Indicators */
+    --ms-status-connected: #30e60b;
+    --ms-status-disconnected: #ff4f5e;
+    --ms-status-processing: #0a84ff;
+    --ms-status-warning: #ff9f1a;
+    
+    /* Shadows */
+    --ms-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --ms-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --ms-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* =========================
+   High Contrast Mode (A11Y-002)
+   ========================= */
+@media (prefers-contrast: more) {
+  :root {
+    --ms-color-text: #000000;
+    --ms-color-text-secondary: #1a1a1a;
+    --ms-color-background: #ffffff;
+    --ms-color-surface: #f5f5f5;
+    --ms-color-border: #000000;
+    --ms-focus-outline: 3px solid #000000;
+  }
+}
+
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root {
+    --ms-color-text: #ffffff;
+    --ms-color-text-secondary: #e6e6e6;
+    --ms-color-background: #000000;
+    --ms-color-surface: #1a1a1a;
+    --ms-color-border: #ffffff;
+    --ms-focus-outline: 3px solid #ffffff;
+  }
+}
+
+/* =========================
+   Forced Colors Mode (A11Y-002)
+   ========================= */
+@media (forced-colors: active) {
+  :root {
+    --ms-color-primary: LinkText;
+    --ms-color-text: CanvasText;
+    --ms-color-background: Canvas;
+    --ms-color-border: CanvasText;
+    --ms-focus-outline: 3px solid Highlight;
+  }
+}
+
+/* =========================
+   Base Reset & Defaults
+   ========================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--ms-font-family);
+  font-size: var(--ms-font-size-md);
+  line-height: var(--ms-line-height-normal);
+  color: var(--ms-color-text);
+  background-color: var(--ms-color-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================
+   Utility Classes
+   ========================= */
+
+/* Text */
+.ms-text-primary { color: var(--ms-color-primary); }
+.ms-text-secondary { color: var(--ms-color-text-secondary); }
+.ms-text-success { color: var(--ms-color-success); }
+.ms-text-warning { color: var(--ms-color-warning); }
+.ms-text-error { color: var(--ms-color-error); }
+
+/* Backgrounds */
+.ms-bg-surface { background-color: var(--ms-color-surface); }
+.ms-bg-primary { background-color: var(--ms-color-primary); }
+.ms-bg-success { background-color: var(--ms-color-success-light); }
+.ms-bg-warning { background-color: var(--ms-color-warning-light); }
+.ms-bg-error { background-color: var(--ms-color-error-light); }
+
+/* Spacing */
+.ms-m-0 { margin: 0; }
+.ms-p-0 { padding: 0; }
+.ms-m-sm { margin: var(--ms-space-sm); }
+.ms-m-md { margin: var(--ms-space-md); }
+.ms-p-sm { padding: var(--ms-space-sm); }
+.ms-p-md { padding: var(--ms-space-md); }
+.ms-p-lg { padding: var(--ms-space-lg); }
+.ms-mt-sm { margin-top: var(--ms-space-sm); }
+.ms-mt-md { margin-top: var(--ms-space-md); }
+.ms-mb-sm { margin-bottom: var(--ms-space-sm); }
+.ms-mb-md { margin-bottom: var(--ms-space-md); }
+
+/* Flexbox */
+.ms-flex { display: flex; }
+.ms-flex-col { flex-direction: column; }
+.ms-items-center { align-items: center; }
+.ms-justify-center { justify-content: center; }
+.ms-justify-between { justify-content: space-between; }
+.ms-gap-sm { gap: var(--ms-space-sm); }
+.ms-gap-md { gap: var(--ms-space-md); }
+
+/* Text alignment */
+.ms-text-center { text-align: center; }
+.ms-text-left { text-align: left; }
+.ms-text-right { text-align: right; }

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="extensionName">MailSorter AI</title>
+    <link rel="stylesheet" href="../shared/theme.css">
+    <link rel="stylesheet" href="../shared/accessibility.css">
+    <link rel="stylesheet" href="../shared/components.css">
+    <link rel="stylesheet" href="onboarding.css">
+</head>
+<body>
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="ms-skip-link" data-i18n="a11y_skip_to_content">Skip to main content</a>
+    
+    <!-- Live region for screen reader announcements -->
+    <div id="live-region" class="ms-live-region" aria-live="polite" aria-atomic="true"></div>
+    
+    <main id="main-content" class="onboarding-container">
+        <!-- Progress indicator -->
+        <div class="onboarding-progress" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="4">
+            <div class="progress-steps">
+                <div class="progress-step active" data-step="0">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Welcome</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="1">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Provider</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="2">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Test</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step" data-step="3">
+                    <span class="step-number">4</span>
+                    <span class="step-label">Folders</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 0: Welcome -->
+        <section id="step-0" class="onboarding-step active" role="tabpanel" aria-labelledby="step-0-heading">
+            <div class="step-content">
+                <div class="step-icon">📧</div>
+                <h1 id="step-0-heading" class="step-title" data-i18n="onboarding_welcome_title">Welcome to MailSorter</h1>
+                <p class="step-description" data-i18n="onboarding_welcome_desc">
+                    Let's set up your AI-powered email sorting in just a few steps.
+                </p>
+                
+                <div class="welcome-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">🤖</span>
+                        <div class="feature-content">
+                            <strong>AI-Powered Classification</strong>
+                            <p>Automatically sort emails into the right folders using advanced AI</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔒</span>
+                        <div class="feature-content">
+                            <strong>Privacy First</strong>
+                            <p>Run locally with Ollama or use cloud providers with your control</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">⚡</span>
+                        <div class="feature-content">
+                            <strong>Instant Organization</strong>
+                            <p>New emails are sorted automatically as they arrive</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-actions">
+                <button class="ms-button ms-button-primary step-next" type="button" data-i18n="common_next">
+                    Get Started
+                </button>
+            </div>
+        </section>
+        
+        <!-- Step 1: Provider Selection -->
+        <section id="step-1" class="onboarding-step" role="tabpanel" aria-labelledby="step-1-heading" hidden>
+            <div class="step-content">
+                <h1 id="step-1-heading" class="step-title" data-i18n="onboarding_provider_title">Choose Your AI Provider</h1>
+                <p class="step-description" data-i18n="onboarding_provider_desc">
+                    Select where your emails will be analyzed. Ollama runs locally for maximum privacy.
+                </p>
+                
+                <div class="provider-options" role="radiogroup" aria-labelledby="step-1-heading">
+                    <label class="provider-option selected" data-provider="ollama">
+                        <input type="radio" name="provider" value="ollama" checked>
+                        <div class="provider-card">
+                            <div class="provider-icon">🏠</div>
+                            <div class="provider-info">
+                                <strong>Ollama (Local)</strong>
+                                <span class="provider-badge provider-badge-privacy">Most Private</span>
+                                <p>Runs on your computer. No data leaves your machine.</p>
+                            </div>
+                            <span class="provider-check">✓</span>
+                        </div>
+                    </label>
+                    
+                    <label class="provider-option" data-provider="openai">
+                        <input type="radio" name="provider" value="openai">
+                        <div class="provider-card">
+                            <div class="provider-icon">🧠</div>
+                            <div class="provider-info">
+                                <strong>OpenAI (GPT-4)</strong>
+                                <span class="provider-badge provider-badge-accuracy">Most Accurate</span>
+                                <p>Uses GPT-4 for best-in-class classification accuracy.</p>
+                            </div>
+                            <span class="provider-check">✓</span>
+                        </div>
+                    </label>
+                    
+                    <label class="provider-option" data-provider="anthropic">
+                        <input type="radio" name="provider" value="anthropic">
+                        <div class="provider-card">
+                            <div class="provider-icon">🤖</div>
+                            <div class="provider-info">
+                                <strong>Anthropic (Claude)</strong>
+                                <p>Claude AI for thoughtful, nuanced classification.</p>
+                            </div>
+                            <span class="provider-check">✓</span>
+                        </div>
+                    </label>
+                    
+                    <label class="provider-option" data-provider="gemini">
+                        <input type="radio" name="provider" value="gemini">
+                        <div class="provider-card">
+                            <div class="provider-icon">✨</div>
+                            <div class="provider-info">
+                                <strong>Google Gemini</strong>
+                                <p>Google's multimodal AI for versatile classification.</p>
+                            </div>
+                            <span class="provider-check">✓</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="step-actions">
+                <button class="ms-button step-back" type="button" data-i18n="common_back">Back</button>
+                <button class="ms-button ms-button-primary step-next" type="button" data-i18n="common_next">Next</button>
+            </div>
+        </section>
+        
+        <!-- Step 2: Connection Test -->
+        <section id="step-2" class="onboarding-step" role="tabpanel" aria-labelledby="step-2-heading" hidden>
+            <div class="step-content">
+                <h1 id="step-2-heading" class="step-title" data-i18n="onboarding_test_title">Test Connection</h1>
+                <p class="step-description" data-i18n="onboarding_test_desc">
+                    Let's make sure everything is working correctly.
+                </p>
+                
+                <div class="connection-test">
+                    <div class="test-item" id="test-backend">
+                        <span class="test-icon">⏳</span>
+                        <span class="test-label">Backend Connection</span>
+                        <span class="test-status">Waiting...</span>
+                    </div>
+                    <div class="test-item" id="test-llm">
+                        <span class="test-icon">⏳</span>
+                        <span class="test-label">LLM Provider</span>
+                        <span class="test-status">Waiting...</span>
+                    </div>
+                </div>
+                
+                <div id="test-result" class="test-result" hidden>
+                    <div id="test-success" class="test-result-success" hidden>
+                        <span class="result-icon">✅</span>
+                        <span class="result-text">All systems working! You're ready to go.</span>
+                    </div>
+                    <div id="test-failure" class="test-result-failure" hidden>
+                        <span class="result-icon">❌</span>
+                        <span class="result-text">Connection failed. Please check your setup.</span>
+                        <details class="error-details">
+                            <summary>Troubleshooting</summary>
+                            <ul>
+                                <li>Make sure the MailSorter backend is running</li>
+                                <li>Check that Ollama is installed and the model is downloaded</li>
+                                <li>Verify your API keys if using cloud providers</li>
+                            </ul>
+                        </details>
+                    </div>
+                </div>
+                
+                <button id="run-test" class="ms-button ms-button-primary test-button" type="button">
+                    <span class="ms-spinner ms-spinner-sm" id="test-spinner" hidden></span>
+                    <span id="test-button-text" data-i18n="common_test">Run Test</span>
+                </button>
+            </div>
+            
+            <div class="step-actions">
+                <button class="ms-button step-back" type="button" data-i18n="common_back">Back</button>
+                <button class="ms-button ms-button-primary step-next" type="button" id="step-2-next" disabled data-i18n="common_next">Next</button>
+                <button class="ms-button ms-button-ghost step-skip" type="button" data-i18n="common_skip">Skip</button>
+            </div>
+        </section>
+        
+        <!-- Step 3: Folder Mapping -->
+        <section id="step-3" class="onboarding-step" role="tabpanel" aria-labelledby="step-3-heading" hidden>
+            <div class="step-content">
+                <h1 id="step-3-heading" class="step-title" data-i18n="onboarding_folders_title">Map Your Folders</h1>
+                <p class="step-description" data-i18n="onboarding_folders_desc">
+                    Tell MailSorter which folders to use for each category.
+                </p>
+                
+                <p class="step-hint">
+                    <strong>Tip:</strong> You can always change these later in Settings.
+                </p>
+                
+                <div class="folder-mapping-simple">
+                    <div class="mapping-row">
+                        <span class="mapping-category">📧 Newsletters</span>
+                        <span class="mapping-arrow">→</span>
+                        <select class="ms-select mapping-folder" data-category="newsletters">
+                            <option value="">Select folder...</option>
+                        </select>
+                    </div>
+                    <div class="mapping-row">
+                        <span class="mapping-category">🧾 Invoices</span>
+                        <span class="mapping-arrow">→</span>
+                        <select class="ms-select mapping-folder" data-category="invoices">
+                            <option value="">Select folder...</option>
+                        </select>
+                    </div>
+                    <div class="mapping-row">
+                        <span class="mapping-category">💼 Work</span>
+                        <span class="mapping-arrow">→</span>
+                        <select class="ms-select mapping-folder" data-category="work">
+                            <option value="">Select folder...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-actions">
+                <button class="ms-button step-back" type="button" data-i18n="common_back">Back</button>
+                <button class="ms-button ms-button-primary step-next" type="button" data-i18n="common_done">Finish Setup</button>
+            </div>
+        </section>
+        
+        <!-- Step 4: Complete -->
+        <section id="step-4" class="onboarding-step" role="tabpanel" aria-labelledby="step-4-heading" hidden>
+            <div class="step-content step-complete">
+                <div class="complete-animation">🎉</div>
+                <h1 id="step-4-heading" class="step-title" data-i18n="onboarding_complete_title">You're All Set!</h1>
+                <p class="step-description" data-i18n="onboarding_complete_desc">
+                    MailSorter is ready to organize your emails. New messages will be sorted automatically.
+                </p>
+                
+                <div class="complete-summary">
+                    <h2>Your Setup</h2>
+                    <dl class="summary-list">
+                        <dt>Provider</dt>
+                        <dd id="summary-provider">Ollama</dd>
+                        <dt>Folder Mappings</dt>
+                        <dd id="summary-mappings">3 categories configured</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <div class="step-actions">
+                <button class="ms-button" type="button" id="open-settings">Open Settings</button>
+                <button class="ms-button ms-button-primary" type="button" id="close-onboarding">Start Sorting</button>
+            </div>
+        </section>
+    </main>
+    
+    <script src="../shared/constants.js"></script>
+    <script src="../shared/i18n.js"></script>
+    <script src="onboarding.js"></script>
+</body>
+</html>

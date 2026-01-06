@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="stats_title">MailSorter Stats</title>
+    <link rel="stylesheet" href="../shared/theme.css">
+    <link rel="stylesheet" href="../shared/accessibility.css">
+    <link rel="stylesheet" href="../shared/components.css">
+    <link rel="stylesheet" href="stats.css">
+</head>
+<body>
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="ms-skip-link" data-i18n="a11y_skip_to_content">Skip to main content</a>
+    
+    <!-- Live region for screen reader announcements -->
+    <div id="live-region" class="ms-live-region" aria-live="polite" aria-atomic="true"></div>
+    
+    <main id="main-content" class="stats-container">
+        <header class="stats-header">
+            <h1>
+                <span class="stats-icon">📊</span>
+                <span data-i18n="stats_title">MailSorter Statistics</span>
+            </h1>
+            <p class="stats-subtitle" data-i18n="stats_subtitle">Track your email sorting activity</p>
+        </header>
+        
+        <!-- Summary Cards -->
+        <section class="stats-summary" aria-labelledby="summary-heading">
+            <h2 id="summary-heading" class="visually-hidden">Summary Statistics</h2>
+            
+            <div class="stats-card stats-card-primary">
+                <div class="stats-card-icon">📬</div>
+                <div class="stats-card-content">
+                    <div class="stats-card-value" id="total-sorted">0</div>
+                    <div class="stats-card-label" data-i18n="stats_total_sorted">Total Sorted</div>
+                </div>
+            </div>
+            
+            <div class="stats-card">
+                <div class="stats-card-icon">💡</div>
+                <div class="stats-card-content">
+                    <div class="stats-card-value" id="total-suggested">0</div>
+                    <div class="stats-card-label" data-i18n="stats_total_suggested">Suggestions Made</div>
+                </div>
+            </div>
+            
+            <div class="stats-card">
+                <div class="stats-card-icon">✅</div>
+                <div class="stats-card-content">
+                    <div class="stats-card-value" id="accuracy-rate">0%</div>
+                    <div class="stats-card-label" data-i18n="stats_accuracy">Acceptance Rate</div>
+                </div>
+            </div>
+            
+            <div class="stats-card">
+                <div class="stats-card-icon">⏱️</div>
+                <div class="stats-card-content">
+                    <div class="stats-card-value" id="time-saved">0 min</div>
+                    <div class="stats-card-label" data-i18n="stats_time_saved">Time Saved</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Activity Chart -->
+        <section class="stats-section" aria-labelledby="activity-heading">
+            <h2 id="activity-heading" data-i18n="stats_activity">Recent Activity</h2>
+            <div class="stats-chart" id="activity-chart">
+                <div class="chart-bars" role="img" aria-label="Daily sorting activity chart">
+                    <!-- Bars will be generated dynamically -->
+                </div>
+                <div class="chart-labels">
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span>Sat</span>
+                    <span>Sun</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Category Breakdown -->
+        <section class="stats-section" aria-labelledby="categories-heading">
+            <h2 id="categories-heading" data-i18n="stats_categories">Categories</h2>
+            <div class="stats-categories" id="category-breakdown">
+                <!-- Categories will be populated dynamically -->
+                <div class="category-empty" data-i18n="stats_no_categories">
+                    No sorting activity yet
+                </div>
+            </div>
+        </section>
+        
+        <!-- Recent Sorts -->
+        <section class="stats-section" aria-labelledby="recent-heading">
+            <h2 id="recent-heading" data-i18n="stats_recent">Recent Sorts</h2>
+            <div class="stats-recent" id="recent-sorts">
+                <div class="recent-empty" data-i18n="stats_no_recent">
+                    No recent sorting activity
+                </div>
+            </div>
+        </section>
+        
+        <!-- Actions -->
+        <div class="stats-actions">
+            <button class="ms-button" type="button" id="export-stats" data-i18n="stats_export">
+                Export Data
+            </button>
+            <button class="ms-button ms-button-ghost" type="button" id="clear-stats" data-i18n="stats_clear">
+                Clear Statistics
+            </button>
+        </div>
+    </main>
+    
+    <script src="../shared/constants.js"></script>
+    <script src="../shared/i18n.js"></script>
+    <script src="stats.js"></script>
+</body>
+</html>

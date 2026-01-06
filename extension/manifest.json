@@ -1,27 +1,65 @@
 {
   "manifest_version": 2,
-  "name": "MailSorter AI",
-  "version": "0.1.0",
-  "description": "Tri automatique des emails via LLM Local (Ollama) ou Cloud. Conformité RGPD Plan V5.",
+  "name": "__MSG_extensionName__",
+  "version": "0.2.0",
+  "description": "__MSG_extensionDescription__",
   "author": "MailSorter Contributors",
+  "default_locale": "en",
   "icons": {
-    "48": "icons/icon-48.png"
+    "16": "icons/icon-16.svg",
+    "32": "icons/icon-32.svg",
+    "48": "icons/icon-48.svg",
+    "96": "icons/icon-96.svg",
+    "128": "icons/icon-128.svg"
   },
   "permissions": [
     "messagesRead",
     "messagesModify",
+    "messagesMove",
     "accountsRead",
     "foldersRead",
     "nativeMessaging",
-    "storage"
+    "storage",
+    "notifications",
+    "menus",
+    "tabs"
   ],
   "content_security_policy": "script-src 'self'; object-src 'self'",
   "background": {
-    "scripts": ["background/feature_detection.js", "background/error_handler.js", "background/native_client.js", "background/background.js"]
+    "scripts": [
+      "shared/constants.js",
+      "shared/i18n.js",
+      "background/feature_detection.js",
+      "background/error_handler.js",
+      "background/state_store.js",
+      "background/native_client.js",
+      "background/undo_manager.js",
+      "background/keyboard_shortcuts.js",
+      "background/context_menu.js",
+      "background/background.js"
+    ]
+  },
+  "browser_action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.svg",
+      "32": "icons/icon-32.svg",
+      "48": "icons/icon-48.svg"
+    },
+    "default_title": "__MSG_browserActionTitle__"
   },
   "options_ui": {
     "page": "options/options.html",
     "browser_style": true
+  },
+  "commands": {
+    "classify-selected": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+M",
+        "mac": "Command+Shift+M"
+      },
+      "description": "__MSG_commandClassify__"
+    }
   },
   "browser_specific_settings": {
     "gecko": {

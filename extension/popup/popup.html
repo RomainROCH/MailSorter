@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MailSorter</title>
+    <link rel="stylesheet" href="../shared/theme.css">
+    <link rel="stylesheet" href="../shared/accessibility.css">
+    <link rel="stylesheet" href="../shared/components.css">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <!-- Live region for screen reader announcements -->
+    <div id="live-region" class="ms-live-region" aria-live="polite" aria-atomic="true"></div>
+    
+    <main class="popup-container">
+        <!-- Header with logo and status -->
+        <header class="popup-header">
+            <div class="popup-title">
+                <img src="../icons/icon-32.png" alt="" class="popup-logo" width="24" height="24">
+                <span>MailSorter</span>
+            </div>
+            <div id="connection-indicator" class="connection-indicator" role="status" aria-live="polite">
+                <span class="ms-status-dot ms-status-dot-disconnected" id="status-dot"></span>
+            </div>
+        </header>
+        
+        <!-- Status Section -->
+        <section class="popup-section" aria-labelledby="status-heading">
+            <h2 id="status-heading" class="popup-section-title" data-i18n="popup_status">Status</h2>
+            
+            <div class="status-grid">
+                <div class="status-item">
+                    <span class="status-label" data-i18n="popup_backend">Backend</span>
+                    <span class="ms-status-badge" id="backend-status">
+                        <span class="ms-status-dot ms-status-dot-disconnected"></span>
+                        <span data-i18n="status_disconnected">Disconnected</span>
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label" data-i18n="popup_llm">LLM Provider</span>
+                    <span class="ms-status-badge" id="llm-status">
+                        <span class="ms-status-dot ms-status-dot-disconnected"></span>
+                        <span id="llm-name">-</span>
+                    </span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Processing Indicator -->
+        <section id="processing-section" class="popup-section processing-section" hidden aria-labelledby="processing-heading">
+            <h2 id="processing-heading" class="ms-sr-only">Processing Status</h2>
+            <div class="processing-indicator">
+                <span class="ms-spinner ms-spinner-sm"></span>
+                <span id="processing-text" data-i18n="status_processing">Processing...</span>
+            </div>
+            <div class="ms-progress">
+                <div class="ms-progress-bar" id="processing-progress" style="width: 0%"></div>
+            </div>
+        </section>
+        
+        <!-- Passive Mode Toggle -->
+        <section class="popup-section" aria-labelledby="mode-heading">
+            <h2 id="mode-heading" class="ms-sr-only">Sorting Mode</h2>
+            <label class="ms-toggle passive-toggle">
+                <input type="checkbox" id="passive-toggle" aria-describedby="passive-desc">
+                <span class="ms-toggle-track">
+                    <span class="ms-toggle-thumb"></span>
+                </span>
+                <span id="passive-label" class="passive-label" data-i18n="popup_passive_off">Sorting Active</span>
+            </label>
+            <small id="passive-desc" class="ms-text-secondary passive-desc">
+                Toggle to pause automatic sorting
+            </small>
+        </section>
+        
+        <!-- Stats Section -->
+        <section class="popup-section stats-section" aria-labelledby="stats-heading">
+            <h2 id="stats-heading" class="popup-section-title" data-i18n="stats_title">Statistics</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-today">0</span>
+                    <span class="stat-label" data-i18n="popup_sorted_today">Sorted today</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-week">0</span>
+                    <span class="stat-label" data-i18n="popup_sorted_week">Sorted this week</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Undo Section -->
+        <section id="undo-section" class="popup-section undo-section" hidden aria-labelledby="undo-heading">
+            <h2 id="undo-heading" class="ms-sr-only">Undo Available</h2>
+            <div class="undo-card">
+                <div class="undo-content">
+                    <span id="undo-message" class="undo-message">Moved to Inbox</span>
+                    <span id="undo-countdown" class="undo-countdown">10s</span>
+                </div>
+                <button id="undo-button" class="ms-button ms-button-sm" data-i18n="common_undo">
+                    Undo
+                </button>
+            </div>
+            <div class="ms-progress undo-progress">
+                <div class="ms-progress-bar" id="undo-progress"></div>
+            </div>
+        </section>
+        
+        <!-- Actions -->
+        <footer class="popup-footer">
+            <button id="open-options" class="ms-button ms-button-primary" data-i18n="popup_open_options">
+                Open Settings
+            </button>
+        </footer>
+    </main>
+    
+    <script src="../shared/constants.js"></script>
+    <script src="../shared/i18n.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

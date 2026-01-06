@@ -1,0 +1,492 @@
+{
+  "extensionName": {
+    "message": "MailSorter AI",
+    "description": "Extension name"
+  },
+  "extensionDescription": {
+    "message": "Automatic email sorting using AI (Ollama, OpenAI, Anthropic, Gemini). GDPR compliant.",
+    "description": "Extension description"
+  },
+  "browserActionTitle": {
+    "message": "MailSorter",
+    "description": "Browser action tooltip"
+  },
+  "commandClassify": {
+    "message": "Classify selected email",
+    "description": "Keyboard shortcut description"
+  },
+  
+  "common_save": {
+    "message": "Save",
+    "description": "Save button"
+  },
+  "common_cancel": {
+    "message": "Cancel",
+    "description": "Cancel button"
+  },
+  "common_close": {
+    "message": "Close",
+    "description": "Close button"
+  },
+  "common_back": {
+    "message": "Back",
+    "description": "Back button"
+  },
+  "common_next": {
+    "message": "Next",
+    "description": "Next button"
+  },
+  "common_skip": {
+    "message": "Skip",
+    "description": "Skip button"
+  },
+  "common_done": {
+    "message": "Done",
+    "description": "Done button"
+  },
+  "common_undo": {
+    "message": "Undo",
+    "description": "Undo button"
+  },
+  "common_retry": {
+    "message": "Retry",
+    "description": "Retry button"
+  },
+  "common_test": {
+    "message": "Test",
+    "description": "Test button"
+  },
+  "common_loading": {
+    "message": "Loading...",
+    "description": "Loading indicator"
+  },
+  "common_error": {
+    "message": "Error",
+    "description": "Error label"
+  },
+  "common_success": {
+    "message": "Success",
+    "description": "Success label"
+  },
+  "common_warning": {
+    "message": "Warning",
+    "description": "Warning label"
+  },
+  
+  "status_connected": {
+    "message": "Connected",
+    "description": "Connected status"
+  },
+  "status_disconnected": {
+    "message": "Disconnected",
+    "description": "Disconnected status"
+  },
+  "status_checking": {
+    "message": "Checking...",
+    "description": "Checking connection status"
+  },
+  "status_processing": {
+    "message": "Processing...",
+    "description": "Processing status"
+  },
+  "status_idle": {
+    "message": "Idle",
+    "description": "Idle status"
+  },
+  
+  "options_title": {
+    "message": "MailSorter Settings",
+    "description": "Options page title"
+  },
+  "options_provider": {
+    "message": "LLM Provider",
+    "description": "Provider selection label"
+  },
+  "options_provider_desc": {
+    "message": "Choose your AI provider for email classification",
+    "description": "Provider selection description"
+  },
+  "options_provider_ollama": {
+    "message": "Ollama (Local)",
+    "description": "Ollama provider option"
+  },
+  "options_provider_openai": {
+    "message": "OpenAI (GPT-4)",
+    "description": "OpenAI provider option"
+  },
+  "options_provider_anthropic": {
+    "message": "Anthropic (Claude)",
+    "description": "Anthropic provider option"
+  },
+  "options_provider_gemini": {
+    "message": "Google Gemini",
+    "description": "Gemini provider option"
+  },
+  "options_analysis_mode": {
+    "message": "Analysis Mode",
+    "description": "Analysis mode label"
+  },
+  "options_analysis_full": {
+    "message": "Full (Subject + Body)",
+    "description": "Full analysis mode"
+  },
+  "options_analysis_headers": {
+    "message": "Headers Only (More Private)",
+    "description": "Headers only mode"
+  },
+  "options_thresholds": {
+    "message": "Confidence Thresholds",
+    "description": "Thresholds section title"
+  },
+  "options_thresholds_desc": {
+    "message": "Minimum confidence required to move emails (0.0 - 1.0)",
+    "description": "Thresholds description"
+  },
+  "options_threshold_default": {
+    "message": "Default threshold",
+    "description": "Default threshold label"
+  },
+  "options_passive_mode": {
+    "message": "Passive Mode",
+    "description": "Passive mode toggle label"
+  },
+  "options_passive_mode_desc": {
+    "message": "When enabled, emails are classified but not moved automatically",
+    "description": "Passive mode description"
+  },
+  "options_test_connection": {
+    "message": "Test Connection",
+    "description": "Test connection button"
+  },
+  "options_connection_success": {
+    "message": "Connection successful! Backend and LLM are working.",
+    "description": "Connection test success message"
+  },
+  "options_connection_failed": {
+    "message": "Connection failed. Please check your settings.",
+    "description": "Connection test failure message"
+  },
+  "options_saved": {
+    "message": "Settings saved successfully",
+    "description": "Settings saved notification"
+  },
+  "options_folder_mapping": {
+    "message": "Folder Mapping",
+    "description": "Folder mapping section title"
+  },
+  "options_folder_mapping_desc": {
+    "message": "Drag categories to folders to set up email routing",
+    "description": "Folder mapping description"
+  },
+  
+  "onboarding_welcome_title": {
+    "message": "Welcome to MailSorter",
+    "description": "Onboarding welcome title"
+  },
+  "onboarding_welcome_desc": {
+    "message": "Let's set up your AI-powered email sorting in just a few steps.",
+    "description": "Onboarding welcome description"
+  },
+  "onboarding_provider_title": {
+    "message": "Choose Your AI Provider",
+    "description": "Onboarding provider step title"
+  },
+  "onboarding_provider_desc": {
+    "message": "Select where your emails will be analyzed. Ollama runs locally for maximum privacy.",
+    "description": "Onboarding provider step description"
+  },
+  "onboarding_test_title": {
+    "message": "Test Connection",
+    "description": "Onboarding test step title"
+  },
+  "onboarding_test_desc": {
+    "message": "Let's make sure everything is working correctly.",
+    "description": "Onboarding test step description"
+  },
+  "onboarding_folders_title": {
+    "message": "Map Your Folders",
+    "description": "Onboarding folders step title"
+  },
+  "onboarding_folders_desc": {
+    "message": "Tell MailSorter which folders to use for each category.",
+    "description": "Onboarding folders step description"
+  },
+  "onboarding_complete_title": {
+    "message": "You're All Set!",
+    "description": "Onboarding complete title"
+  },
+  "onboarding_complete_desc": {
+    "message": "MailSorter is ready to organize your emails. New messages will be sorted automatically.",
+    "description": "Onboarding complete description"
+  },
+  "onboarding_step": {
+    "message": "Step $1 of $2",
+    "description": "Step counter",
+    "placeholders": {
+      "1": { "content": "$1" },
+      "2": { "content": "$2" }
+    }
+  },
+  
+  "popup_status": {
+    "message": "Status",
+    "description": "Popup status section"
+  },
+  "popup_backend": {
+    "message": "Backend",
+    "description": "Backend status label"
+  },
+  "popup_llm": {
+    "message": "LLM Provider",
+    "description": "LLM status label"
+  },
+  "popup_sorted_today": {
+    "message": "Sorted today",
+    "description": "Today's sort count"
+  },
+  "popup_sorted_week": {
+    "message": "Sorted this week",
+    "description": "Week's sort count"
+  },
+  "popup_open_options": {
+    "message": "Open Settings",
+    "description": "Open options button"
+  },
+  "popup_passive_on": {
+    "message": "Sorting Paused",
+    "description": "Passive mode on indicator"
+  },
+  "popup_passive_off": {
+    "message": "Sorting Active",
+    "description": "Passive mode off indicator"
+  },
+  
+  "undo_message": {
+    "message": "Moved to $1",
+    "description": "Undo notification message",
+    "placeholders": {
+      "1": { "content": "$1" }
+    }
+  },
+  "undo_success": {
+    "message": "Move undone",
+    "description": "Undo success message"
+  },
+  "undo_expired": {
+    "message": "Undo window expired",
+    "description": "Undo expired message"
+  },
+  
+  "context_menu_sort": {
+    "message": "Sort with MailSorter",
+    "description": "Context menu item"
+  },
+  "context_menu_sort_selection": {
+    "message": "Sort selected emails",
+    "description": "Context menu item for selection"
+  },
+  
+  "bulk_progress_title": {
+    "message": "Sorting emails...",
+    "description": "Bulk sort progress title"
+  },
+  "bulk_progress_count": {
+    "message": "$1 of $2 emails",
+    "description": "Bulk sort progress count",
+    "placeholders": {
+      "1": { "content": "$1" },
+      "2": { "content": "$2" }
+    }
+  },
+  "bulk_complete": {
+    "message": "Sorted $1 emails",
+    "description": "Bulk sort complete message",
+    "placeholders": {
+      "1": { "content": "$1" }
+    }
+  },
+  "bulk_cancel": {
+    "message": "Cancel",
+    "description": "Cancel bulk operation"
+  },
+  
+  "error_backend_disconnected": {
+    "message": "Cannot connect to MailSorter backend. Please ensure it's running.",
+    "description": "Backend disconnected error"
+  },
+  "error_llm_unavailable": {
+    "message": "LLM provider is not available. Check your configuration.",
+    "description": "LLM unavailable error"
+  },
+  "error_classification_failed": {
+    "message": "Failed to classify email",
+    "description": "Classification failed error"
+  },
+  "error_move_failed": {
+    "message": "Failed to move email to $1",
+    "description": "Move failed error",
+    "placeholders": {
+      "1": { "content": "$1" }
+    }
+  },
+  
+  "category_newsletters": {
+    "message": "Newsletters",
+    "description": "Newsletter category"
+  },
+  "category_invoices": {
+    "message": "Invoices",
+    "description": "Invoice category"
+  },
+  "category_work": {
+    "message": "Work",
+    "description": "Work category"
+  },
+  "category_personal": {
+    "message": "Personal",
+    "description": "Personal category"
+  },
+  "category_support": {
+    "message": "Support",
+    "description": "Support category"
+  },
+  "category_social": {
+    "message": "Social",
+    "description": "Social category"
+  },
+  "category_promotions": {
+    "message": "Promotions",
+    "description": "Promotions category"
+  },
+  
+  "stats_title": {
+    "message": "Statistics",
+    "description": "Stats section title"
+  },
+  "stats_emails_sorted_one": {
+    "message": "$1 email sorted",
+    "description": "One email sorted",
+    "placeholders": {
+      "1": { "content": "$1" }
+    }
+  },
+  "stats_emails_sorted_other": {
+    "message": "$1 emails sorted",
+    "description": "Multiple emails sorted",
+    "placeholders": {
+      "1": { "content": "$1" }
+    }
+  },
+  "stats_avg_confidence": {
+    "message": "Average confidence: $1%",
+    "description": "Average confidence stat",
+    "placeholders": {
+      "1": { "content": "$1" }
+    }
+  },
+  "stats_title": {
+    "message": "MailSorter Statistics",
+    "description": "Stats page title"
+  },
+  "stats_subtitle": {
+    "message": "Track your email sorting activity",
+    "description": "Stats page subtitle"
+  },
+  "stats_total_suggested": {
+    "message": "Suggestions Made",
+    "description": "Total suggestions stat"
+  },
+  "stats_accuracy": {
+    "message": "Acceptance Rate",
+    "description": "Accuracy rate stat"
+  },
+  "stats_time_saved": {
+    "message": "Time Saved",
+    "description": "Time saved stat"
+  },
+  "stats_activity": {
+    "message": "Recent Activity",
+    "description": "Activity section heading"
+  },
+  "stats_categories": {
+    "message": "Categories",
+    "description": "Categories section heading"
+  },
+  "stats_no_categories": {
+    "message": "No sorting activity yet",
+    "description": "Empty categories message"
+  },
+  "stats_recent": {
+    "message": "Recent Sorts",
+    "description": "Recent sorts section heading"
+  },
+  "stats_no_recent": {
+    "message": "No recent sorting activity",
+    "description": "Empty recent message"
+  },
+  "stats_export": {
+    "message": "Export Data",
+    "description": "Export button"
+  },
+  "stats_clear": {
+    "message": "Clear Statistics",
+    "description": "Clear stats button"
+  },
+  
+  "onboarding_welcome_title": {
+    "message": "Welcome to MailSorter",
+    "description": "Onboarding welcome title"
+  },
+  "onboarding_welcome_desc": {
+    "message": "Let's set up your AI-powered email sorting in just a few steps.",
+    "description": "Onboarding welcome description"
+  },
+  "onboarding_provider_title": {
+    "message": "Choose Your AI Provider",
+    "description": "Provider selection title"
+  },
+  "onboarding_provider_desc": {
+    "message": "Select where your emails will be analyzed. Ollama runs locally for maximum privacy.",
+    "description": "Provider selection description"
+  },
+  "onboarding_test_title": {
+    "message": "Test Connection",
+    "description": "Connection test title"
+  },
+  "onboarding_test_desc": {
+    "message": "Let's make sure everything is working correctly.",
+    "description": "Connection test description"
+  },
+  "onboarding_folders_title": {
+    "message": "Map Your Folders",
+    "description": "Folder mapping title"
+  },
+  "onboarding_folders_desc": {
+    "message": "Tell MailSorter which folders to use for each category.",
+    "description": "Folder mapping description"
+  },
+  "onboarding_complete_title": {
+    "message": "You're All Set!",
+    "description": "Completion title"
+  },
+  "onboarding_complete_desc": {
+    "message": "MailSorter is ready to organize your emails. New messages will be sorted automatically.",
+    "description": "Completion description"
+  },
+  
+  "a11y_skip_to_content": {
+    "message": "Skip to main content",
+    "description": "Skip link text"
+  },
+  "a11y_status_update": {
+    "message": "Status changed to: $1",
+    "description": "Screen reader status announcement",
+    "placeholders": {
+      "1": { "content": "$1" }
+    }
+  },
+  "a11y_drag_instructions": {
+    "message": "Press Space to grab, Arrow keys to move, Space to drop",
+    "description": "Drag and drop instructions for screen readers"
+  }
+}

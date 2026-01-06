@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="options_title">MailSorter Settings</title>
+    <link rel="stylesheet" href="../shared/theme.css">
+    <link rel="stylesheet" href="../shared/accessibility.css">
+    <link rel="stylesheet" href="../shared/components.css">
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="ms-skip-link" data-i18n="a11y_skip_to_content">Skip to main content</a>
+    
+    <!-- Live region for screen reader announcements -->
+    <div id="live-region" class="ms-live-region" aria-live="polite" aria-atomic="true"></div>
+    
+    <main id="main-content" class="options-container">
+        <header class="options-header">
+            <h1 class="options-title" data-i18n="options_title">MailSorter Settings</h1>
+            <div id="connection-status" class="connection-status">
+                <span class="ms-status-dot ms-status-dot-disconnected" id="status-dot"></span>
+                <span id="status-text" data-i18n="status_disconnected">Disconnected</span>
+            </div>
+        </header>
+        
+        <!-- Tabs -->
+        <nav class="ms-tabs" role="tablist" aria-label="Settings sections">
+            <button class="ms-tab ms-tab-active" role="tab" aria-selected="true" aria-controls="panel-general" id="tab-general" tabindex="0">
+                General
+            </button>
+            <button class="ms-tab" role="tab" aria-selected="false" aria-controls="panel-folders" id="tab-folders" tabindex="-1">
+                Folders
+            </button>
+            <button class="ms-tab" role="tab" aria-selected="false" aria-controls="panel-thresholds" id="tab-thresholds" tabindex="-1">
+                Thresholds
+            </button>
+            <button class="ms-tab" role="tab" aria-selected="false" aria-controls="panel-advanced" id="tab-advanced" tabindex="-1">
+                Advanced
+            </button>
+        </nav>
+        
+        <!-- General Settings Tab -->
+        <section id="panel-general" class="ms-tab-panel ms-tab-panel-active" role="tabpanel" aria-labelledby="tab-general">
+            <div class="ms-card">
+                <div class="ms-card-header">
+                    <h2 class="ms-card-title" data-i18n="options_provider">LLM Provider</h2>
+                </div>
+                <div class="ms-card-body">
+                    <p class="ms-text-secondary" data-i18n="options_provider_desc">Choose your AI provider for email classification</p>
+                    
+                    <div class="ms-form-group">
+                        <label class="ms-label" for="provider-select" data-i18n="options_provider">LLM Provider</label>
+                        <select id="provider-select" class="ms-select" aria-describedby="provider-desc">
+                            <option value="ollama" data-i18n="options_provider_ollama">Ollama (Local)</option>
+                            <option value="openai" data-i18n="options_provider_openai">OpenAI (GPT-4)</option>
+                            <option value="anthropic" data-i18n="options_provider_anthropic">Anthropic (Claude)</option>
+                            <option value="gemini" data-i18n="options_provider_gemini">Google Gemini</option>
+                        </select>
+                        <small id="provider-desc" class="ms-field-description">
+                            Ollama runs locally for maximum privacy. Cloud providers require API keys configured in the backend.
+                        </small>
+                    </div>
+                    
+                    <div class="ms-form-group">
+                        <label class="ms-label" for="analysis-mode" data-i18n="options_analysis_mode">Analysis Mode</label>
+                        <select id="analysis-mode" class="ms-select">
+                            <option value="full" data-i18n="options_analysis_full">Full (Subject + Body)</option>
+                            <option value="headers_only" data-i18n="options_analysis_headers">Headers Only (More Private)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="ms-form-group">
+                        <label class="ms-checkbox">
+                            <input type="checkbox" id="passive-mode">
+                            <span data-i18n="options_passive_mode">Passive Mode</span>
+                        </label>
+                        <small class="ms-field-description" data-i18n="options_passive_mode_desc">
+                            When enabled, emails are classified but not moved automatically
+                        </small>
+                    </div>
+                    
+                    <div class="options-actions">
+                        <button id="test-connection" class="ms-button" type="button">
+                            <span class="ms-spinner ms-spinner-sm" id="test-spinner" hidden></span>
+                            <span data-i18n="options_test_connection">Test Connection</span>
+                        </button>
+                        <div id="test-result" class="test-result" hidden></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Folders Tab -->
+        <section id="panel-folders" class="ms-tab-panel" role="tabpanel" aria-labelledby="tab-folders" hidden>
+            <div class="ms-card">
+                <div class="ms-card-header">
+                    <h2 class="ms-card-title" data-i18n="options_folder_mapping">Folder Mapping</h2>
+                </div>
+                <div class="ms-card-body">
+                    <p class="ms-text-secondary" data-i18n="options_folder_mapping_desc">
+                        Drag categories to folders to set up email routing
+                    </p>
+                    
+                    <div id="folder-mapper" class="folder-mapper">
+                        <div class="folder-mapper-categories">
+                            <h3>Categories</h3>
+                            <ul id="category-list" class="ms-list category-list" role="listbox" aria-label="Email categories">
+                                <!-- Categories will be populated by JavaScript -->
+                            </ul>
+                        </div>
+                        
+                        <div class="folder-mapper-arrow">→</div>
+                        
+                        <div class="folder-mapper-folders">
+                            <h3>Folders</h3>
+                            <ul id="folder-list" class="ms-list folder-list" role="listbox" aria-label="Email folders">
+                                <!-- Folders will be populated by JavaScript -->
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div id="current-mappings" class="current-mappings">
+                        <h3>Current Mappings</h3>
+                        <ul id="mappings-list" class="ms-list">
+                            <!-- Mappings will be populated by JavaScript -->
+                        </ul>
+                        <p id="no-mappings" class="ms-text-secondary">No folder mappings configured yet.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Thresholds Tab -->
+        <section id="panel-thresholds" class="ms-tab-panel" role="tabpanel" aria-labelledby="tab-thresholds" hidden>
+            <div class="ms-card">
+                <div class="ms-card-header">
+                    <h2 class="ms-card-title" data-i18n="options_thresholds">Confidence Thresholds</h2>
+                </div>
+                <div class="ms-card-body">
+                    <p class="ms-text-secondary" data-i18n="options_thresholds_desc">
+                        Minimum confidence required to move emails (0.0 - 1.0)
+                    </p>
+                    
+                    <div class="ms-form-group">
+                        <label class="ms-label" for="threshold-default" data-i18n="options_threshold_default">Default threshold</label>
+                        <div class="threshold-input">
+                            <input type="range" id="threshold-default" min="0" max="100" value="70" class="ms-range">
+                            <span id="threshold-default-value" class="threshold-value">0.70</span>
+                        </div>
+                    </div>
+                    
+                    <div id="folder-thresholds" class="folder-thresholds">
+                        <!-- Per-folder thresholds will be populated by JavaScript -->
+                    </div>
+                    
+                    <button id="add-threshold" class="ms-button ms-button-ghost" type="button">
+                        + Add folder-specific threshold
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Advanced Tab -->
+        <section id="panel-advanced" class="ms-tab-panel" role="tabpanel" aria-labelledby="tab-advanced" hidden>
+            <div class="ms-card">
+                <div class="ms-card-header">
+                    <h2 class="ms-card-title">Advanced Settings</h2>
+                </div>
+                <div class="ms-card-body">
+                    <div class="ms-form-group">
+                        <label class="ms-label" for="keyboard-shortcut">Classify Shortcut</label>
+                        <input type="text" id="keyboard-shortcut" class="ms-input" readonly placeholder="Ctrl+Shift+M">
+                        <small class="ms-field-description">
+                            Press the shortcut to classify the selected email manually
+                        </small>
+                    </div>
+                    
+                    <div class="ms-form-group">
+                        <h3>Statistics</h3>
+                        <div id="stats-display" class="stats-display">
+                            <div class="stat-item">
+                                <span class="stat-label" data-i18n="popup_sorted_today">Sorted today</span>
+                                <span class="stat-value" id="stat-today">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label" data-i18n="popup_sorted_week">Sorted this week</span>
+                                <span class="stat-value" id="stat-week">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ms-form-group">
+                        <button id="reset-stats" class="ms-button ms-button-ghost" type="button">
+                            Reset Statistics
+                        </button>
+                        <button id="reset-settings" class="ms-button ms-button-danger" type="button">
+                            Reset All Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Save Footer -->
+        <footer class="options-footer">
+            <div id="save-status" class="save-status" hidden>
+                <span class="ms-spinner ms-spinner-sm"></span>
+                <span>Saving...</span>
+            </div>
+            <button id="save-button" class="ms-button ms-button-primary" type="button" data-i18n="common_save">
+                Save
+            </button>
+        </footer>
+    </main>
+    
+    <!-- Toast container for notifications -->
+    <div id="toast-container" class="ms-toast-container" aria-live="polite"></div>
+    
+    <script src="../shared/constants.js"></script>
+    <script src="../shared/i18n.js"></script>
+    <script src="options.js"></script>
+</body>
+</html>

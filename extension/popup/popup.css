@@ -1,0 +1,196 @@
+/**
+ * MailSorter Popup Styles
+ */
+
+/* Layout */
+.popup-container {
+    width: 320px;
+    min-height: 200px;
+    padding: var(--ms-space-md);
+}
+
+/* Header */
+.popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--ms-space-md);
+    border-bottom: 1px solid var(--ms-color-border);
+    margin-bottom: var(--ms-space-md);
+}
+
+.popup-title {
+    display: flex;
+    align-items: center;
+    gap: var(--ms-space-sm);
+    font-size: var(--ms-font-size-lg);
+    font-weight: var(--ms-font-weight-bold);
+}
+
+.popup-logo {
+    width: 24px;
+    height: 24px;
+}
+
+.connection-indicator {
+    display: flex;
+    align-items: center;
+}
+
+/* Sections */
+.popup-section {
+    margin-bottom: var(--ms-space-md);
+}
+
+.popup-section-title {
+    font-size: var(--ms-font-size-xs);
+    font-weight: var(--ms-font-weight-medium);
+    text-transform: uppercase;
+    color: var(--ms-color-text-secondary);
+    margin: 0 0 var(--ms-space-sm) 0;
+    letter-spacing: 0.5px;
+}
+
+/* Status Grid */
+.status-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ms-space-sm);
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.status-label {
+    font-size: var(--ms-font-size-sm);
+    color: var(--ms-color-text-secondary);
+}
+
+/* Processing Section */
+.processing-section {
+    background-color: var(--ms-color-surface);
+    border-radius: var(--ms-radius-md);
+    padding: var(--ms-space-sm) var(--ms-space-md);
+}
+
+.processing-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--ms-space-sm);
+    margin-bottom: var(--ms-space-sm);
+    font-size: var(--ms-font-size-sm);
+}
+
+/* Passive Mode Toggle */
+.passive-toggle {
+    width: 100%;
+    justify-content: space-between;
+    padding: var(--ms-space-sm);
+    background-color: var(--ms-color-surface);
+    border-radius: var(--ms-radius-md);
+}
+
+.passive-label {
+    font-weight: var(--ms-font-weight-medium);
+}
+
+.passive-label.passive-paused {
+    color: var(--ms-color-warning);
+}
+
+.passive-label.passive-active {
+    color: var(--ms-color-success);
+}
+
+.passive-desc {
+    display: block;
+    margin-top: var(--ms-space-xs);
+    font-size: var(--ms-font-size-xs);
+}
+
+/* Stats Section */
+.stats-section {
+    padding: var(--ms-space-md);
+    background-color: var(--ms-color-surface);
+    border-radius: var(--ms-radius-md);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--ms-space-md);
+}
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: var(--ms-font-size-2xl);
+    font-weight: var(--ms-font-weight-bold);
+    color: var(--ms-color-primary);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: var(--ms-font-size-xs);
+    color: var(--ms-color-text-secondary);
+    margin-top: var(--ms-space-xs);
+}
+
+/* Undo Section */
+.undo-section {
+    background-color: var(--ms-color-info-light);
+    border: 1px solid var(--ms-color-info);
+    border-radius: var(--ms-radius-md);
+    padding: var(--ms-space-sm) var(--ms-space-md);
+}
+
+.undo-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--ms-space-sm);
+}
+
+.undo-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.undo-message {
+    font-size: var(--ms-font-size-sm);
+    font-weight: var(--ms-font-weight-medium);
+}
+
+.undo-countdown {
+    font-size: var(--ms-font-size-xs);
+    color: var(--ms-color-text-secondary);
+    font-family: var(--ms-font-family-mono);
+}
+
+.undo-progress .ms-progress-bar {
+    background-color: var(--ms-color-info);
+    animation: ms-countdown-width 10s linear forwards;
+}
+
+@keyframes ms-countdown-width {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* Footer */
+.popup-footer {
+    padding-top: var(--ms-space-md);
+    border-top: 1px solid var(--ms-color-border);
+}
+
+.popup-footer .ms-button {
+    width: 100%;
+}

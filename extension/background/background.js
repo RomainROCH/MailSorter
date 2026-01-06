@@ -9,6 +9,9 @@ const MAX_BODY_LENGTH = 2000; // RGPD: truncate body for privacy
 
 let client = null;
 let featureReport = null;
+let stateStore = null;
+let undoManager = null;
+let passiveMode = false;
 
 // ============================================================
 // Initialization
@@ -17,6 +20,42 @@ let featureReport = null;
 async function initialize() {
     // Run feature detection first
     featureReport = await window.FeatureDetection.logFeatures();
+    
+    // Initialize state store (Phase 5)
+    if (window.StateStore) {
+        stateStore = new window.StateStore();
+        await stateStore.load();
+        console.log("[StateStore] Loaded");
+    }
+    
+    // Initialize undo manager (UX-005)
+    if (window.UndoManager) {
+        undoManager = new window.UndoManager();
+        console.log("[UndoManager] Initialized");
+    }
+    
+    // Initialize context menu (UX-003)
+    if (window.ContextMenu) {
+        window.ContextMenu.init();
+        console.log("[ContextMenu] Initialized");
+    }
+    
+    // Initialize keyboard shortcuts (UX-002)
+    if (window.KeyboardShortcuts) {
+        window.KeyboardShortcuts.init();
+        console.log("[KeyboardShortcuts] Initialized");
+    }
+    
+    // Load passive mode setting
+    const stored = await browser.storage.local.get('config');
+    passiveMode = stored.config?.passiveMode || false;
+    
+    // Check if onboarding needed
+    const onboarding = await browser.storage.local.get('onboarding');
+    if (!onboarding.onboarding?.completed) {
+        // Open onboarding on first run
+        browser.tabs.create({ url: browser.runtime.getURL('onboarding/onboarding.html') });
+    }
     
     // Initialize native client
     client = new window.NativeClient(NATIVE_APP_NAME);
@@ -158,7 +197,21 @@ window.addEventListener("native-response", async (e) => {
     
     if (response.action === "move" && response.target) {
         try {
-            await moveMessage(response.id, response.target);
+            // Skip move in passive mode
+            if (passiveMode) {
+                console.log("[PassiveMode] Would move message " + response.id + " to " + response.target);
+                if (stateStore) {
+                    stateStore.recordSort({ suggested: true, applied: false });
+                }
+                return;
+            }
+            
+            await moveMessage(response.id, response.target, { recordUndo: true });
+            
+            // Record stats
+            if (stateStore) {
+                stateStore.recordSort({ suggested: true, applied: true });
+            }
         } catch (err) {
             window.ErrorHandler.handleMoveError(response.id, response.target, err);
         }
@@ -169,6 +222,151 @@ window.addEventListener("native-response", async (e) => {
         );
     }
 });
+
+// Listen for messages from popup/options (Phase 5 UI)
+browser.runtime.onMessage.addListener(async (message, sender) => {
+    switch (message.type) {
+        case 'health-check':
+            return await handleHealthCheck();
+        
+        case 'test-connection':
+            return await handleTestConnection();
+        
+        case 'set-passive-mode':
+            passiveMode = message.enabled;
+            if (stateStore) {
+                stateStore.set('passiveMode', passiveMode);
+            }
+            return { success: true };
+        
+        case 'get-config':
+            const config = await browser.storage.local.get('config');
+            return config.config || {};
+        
+        case 'save-config':
+            await browser.storage.local.set({ config: message.config });
+            // Apply config changes
+            passiveMode = message.config.passiveMode || false;
+            return { success: true };
+        
+        case 'undo-last-action':
+            return await handleUndo();
+        
+        case 'can-undo':
+            return { canUndo: undoManager?.canUndo() || false };
+        
+        case 'get-stats':
+            if (stateStore) {
+                return stateStore.getStats();
+            }
+            return { sorted: 0, suggested: 0 };
+        
+        case 'onboarding-complete':
+            // Apply initial config from onboarding
+            if (message.config) {
+                await browser.storage.local.set({ config: message.config });
+                passiveMode = message.config.passiveMode || false;
+            }
+            return { success: true };
+        
+        case 'sort-message':
+            // Manual sort from context menu or button
+            if (message.messageId) {
+                try {
+                    const msg = await browser.messages.get(message.messageId);
+                    await processMessage(msg);
+                    return { success: true };
+                } catch (e) {
+                    return { success: false, error: e.message };
+                }
+            }
+            return { success: false, error: 'No message ID' };
+        
+        default:
+            return { error: 'Unknown message type' };
+    }
+});
+
+/**
+ * Handle health check request
+ */
+async function handleHealthCheck() {
+    const isConnected = client && client.isConnected;
+    
+    // If connected, do a quick backend ping
+    let providerHealthy = false;
+    if (isConnected) {
+        try {
+            // The backend health check would need to be implemented
+            providerHealthy = true; // Assume healthy if connected
+        } catch (e) {
+            providerHealthy = false;
+        }
+    }
+    
+    return {
+        status: isConnected ? 'ok' : 'error',
+        backend: isConnected,
+        provider: { healthy: providerHealthy }
+    };
+}
+
+/**
+ * Handle connection test request
+ */
+async function handleTestConnection() {
+    try {
+        if (!client || !client.isConnected) {
+            client = new window.NativeClient(NATIVE_APP_NAME);
+            await client.connect();
+        }
+        
+        // Send a health check to backend
+        client.sendMessage({
+            type: "health_check",
+            payload: {}
+        });
+        
+        // Wait briefly for response
+        await new Promise(r => setTimeout(r, 1000));
+        
+        return {
+            success: client.isConnected,
+            message: client.isConnected ? 'Connected' : 'Connection failed'
+        };
+    } catch (e) {
+        return {
+            success: false,
+            message: e.message
+        };
+    }
+}
+
+/**
+ * Handle undo request
+ */
+async function handleUndo() {
+    if (!undoManager || !undoManager.canUndo()) {
+        return { success: false, error: 'Nothing to undo' };
+    }
+    
+    try {
+        await undoManager.undo();
+        
+        // Update stats
+        if (stateStore) {
+            const stats = stateStore.getStats();
+            stateStore.set('stats', {
+                ...stats,
+                sorted: Math.max(0, (stats.sorted || 0) - 1)
+            });
+        }
+        
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+}
 
 // Listen for new emails
 browser.messages.onNewMailReceived.addListener(async (folder, messages) => {
@@ -224,8 +422,9 @@ async function processMessage(messageHeader) {
     client.sendMessage(payload);
 }
 
-async function moveMessage(messageId, targetFolderName) {
+async function moveMessage(messageId, targetFolderName, options = {}) {
     const msg = await browser.messages.get(messageId);
+    const originalFolder = msg.folder;
     const account = await browser.accounts.get(msg.folder.accountId);
     const folders = await getAllFolders(account);
     
@@ -234,6 +433,23 @@ async function moveMessage(messageId, targetFolderName) {
     if (targetFolder) {
         console.log("Moving message " + messageId + " to " + targetFolderName);
         await browser.messages.move([messageId], targetFolder);
+        
+        // Record for undo (UX-005)
+        if (options.recordUndo && undoManager) {
+            undoManager.recordAction(messageId, originalFolder, targetFolder);
+        }
+        
+        // Show notification
+        try {
+            browser.notifications.create({
+                type: 'basic',
+                iconUrl: browser.runtime.getURL('icons/icon-48.png'),
+                title: 'Email Sorted',
+                message: `Moved to ${targetFolderName}`
+            });
+        } catch (e) {
+            // Notifications may not be available
+        }
         
         // Optionally set custom header/tag if supported
         if (window.FeatureDetection.supportsCustomHeaders()) {

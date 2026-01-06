@@ -30,6 +30,40 @@ except ImportError:
     logger.debug("Jinja2 not available, using simple string formatting")
 
 
+from dataclasses import dataclass
+
+
+@dataclass
+class PromptTemplate:
+    """Lightweight prompt template dataclass used by tests.
+
+    Attributes:
+        name: logical name of the template
+        template: the template string (Jinja2 syntax supported)
+        language: language code (e.g. 'en')
+    """
+    name: str
+    template: str
+    language: str = "en"
+
+    def render(self, **context) -> str:
+        """Render template with provided context using Jinja2 or simple fallback."""
+        if JINJA2_AVAILABLE:
+            try:
+                env = Environment(loader=BaseLoader(), autoescape=False, trim_blocks=True, lstrip_blocks=True)
+                tmpl = env.from_string(self.template)
+                return tmpl.render(**context).strip()
+            except Exception:
+                # Fall back to simple replacement for robustness
+                pass
+
+        result = self.template
+        for k, v in context.items():
+            placeholder = "{{ " + k + " }}"
+            result = result.replace(placeholder, str(v))
+        return result.strip()
+
+
 class PromptEngine:
     """
     Template-based prompt engine with language detection.
@@ -110,23 +144,32 @@ Antworten Sie nur mit JSON."""
     }
     
     def __init__(
-        self, 
+        self,
+        config: Optional[Dict] = None,
         templates_dir: Optional[str] = None,
         default_language: str = "en"
     ):
         """
         Initialize prompt engine.
-        
-        Args:
-            templates_dir: Optional directory for custom templates
-            default_language: Fallback language (default: en)
+
+        Supports both direct kwargs and a config dict (backwards compatible with tests):
+        Example: PromptEngine({"default_language": "en", "templates_dir": None})
         """
+        # Accept either config dict or kwargs
+        if isinstance(config, dict):
+            cfg = config
+            templates_dir = templates_dir or cfg.get("templates_dir")
+            default_language = cfg.get("default_language", default_language)
+            self._max_body_length = cfg.get("max_body_length", 1500)
+        else:
+            self._max_body_length = 1500
+
         self.templates_dir = templates_dir
         self.default_language = default_language
-        
+
         # Sender → language cache for consistency
         self._sender_language_cache: Dict[str, str] = {}
-        
+
         # Initialize Jinja2 if available
         if JINJA2_AVAILABLE:
             self._env = Environment(
@@ -137,11 +180,55 @@ Antworten Sie nur mit JSON."""
             )
         else:
             self._env = None
-        
+
         # Load custom templates if directory provided
         self._custom_templates: Dict[str, str] = {}
         if templates_dir and os.path.isdir(templates_dir):
             self._load_custom_templates(templates_dir)
+
+    # --- Backwards-compatible API wrappers expected by tests ---
+    def build_system_prompt(self, folders: List[str], language: Optional[str] = None) -> str:
+        """Build the system prompt for the specified folder list and language."""
+        lang = language or self.default_language
+        tmpl = self.get_template("system", lang)
+        context = {"folders": folders, "folders_json": json.dumps(folders), "language": lang}
+        if self._env:
+            return self._env.from_string(tmpl).render(**context)
+        # Simple fallback
+        return tmpl.replace("{{ folders_json }}", json.dumps(folders))
+
+    def build_user_prompt(self, sender: Optional[str], subject: Optional[str], body: Optional[str], language: Optional[str] = None) -> str:
+        """Build the user (classification) prompt."""
+        lang = language or self.default_language
+        body_snippet = (body or "(no body)")[: self._max_body_length]
+        return self.render("classify", subject or "", body_snippet, [], language=lang, sender=sender)
+
+    def build_prompt(self, sender: Optional[str], subject: Optional[str], body: Optional[str], folders: List[str]) -> Dict:
+        """Return both system and user prompts plus language metadata."""
+        language = self.detect_language(f"{subject or ''} {body or ''}", sender)
+        system = self.build_system_prompt(folders, language=language)
+        user = self.build_user_prompt(sender, subject, body, language=language)
+        return {"system": system, "user": user, "language": language}
+
+    def supported_languages(self) -> List[str]:
+        return list(self.SUPPORTED_LANGUAGES)
+
+    def add_template(self, name: str, template: str, language: str = "en") -> None:
+        key = f"{name}_{language}"
+        self._custom_templates[key] = template
+
+    def list_templates(self) -> List[Dict]:
+        out = []
+        for key, tmpl in self._custom_templates.items():
+            if key.rfind("_") != -1:
+                name, lang = key.rsplit("_", 1)
+            else:
+                name, lang = key, "en"
+            out.append({"name": name, "language": lang})
+        return out
+
+    def get_cached_language(self, sender: str) -> Optional[str]:
+        return self._sender_language_cache.get(sender)
     
     def _load_custom_templates(self, templates_dir: str) -> None:
         """Load custom templates from directory."""

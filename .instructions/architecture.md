@@ -98,6 +98,51 @@ last-updated: "2026-01-02"
 
 ---
 
+## ⚠️ Git Branching Strategy (MANDATORY)
+
+> **CRITICAL FOR ALL AI AGENTS**: This branching model MUST be followed for ALL code changes.
+
+### Branch Model
+
+| Branch | Purpose | Protected | Direct Push |
+|--------|---------|-----------|-------------|
+| `main` | 🏭 **PRODUCTION** - Always stable, deployable | ✅ YES | ❌ **NEVER** |
+| `develop` | 🔧 Development integration branch | ✅ YES | ❌ **NEVER** |
+| `feat/*` | New features | No | ✅ Yes |
+| `fix/*` | Bug fixes | No | ✅ Yes |
+| `chore/*` | Maintenance, refactors | No | ✅ Yes |
+
+### Workflow Rules
+
+1. **NEVER commit directly to `main` or `develop`**
+2. **ALWAYS create a feature/fix branch** for any change:
+   ```bash
+   git checkout develop
+   git checkout -b feat/my-feature   # or fix/bug-name, chore/task-name
+   ```
+3. **Work in your branch**, commit frequently
+4. **When complete**, push your branch and merge to `develop`:
+   ```bash
+   git push origin feat/my-feature
+   git checkout develop
+   git merge feat/my-feature
+   git push origin develop
+   ```
+5. **Production releases**: Only merge `develop` → `main` when stable:
+   ```bash
+   git checkout main
+   git merge develop
+   git tag vX.Y.Z
+   git push origin main --tags
+   ```
+
+### Why This Matters
+- `main` must ALWAYS be deployable and working
+- `develop` is the integration branch for testing
+- Feature branches isolate work and enable rollback
+
+---
+
 ## Plan V5 Compliance
 
 Voir [docs/PLAN_V5.md](../docs/PLAN_V5.md) pour la spec complète.

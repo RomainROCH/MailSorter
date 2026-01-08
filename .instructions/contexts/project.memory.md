@@ -1,7 +1,47 @@
 # Project Memory & Lessons Learned - MailSorter (Plan V5)
 ---
 description: "Persistent memory of project-specific patterns, anti-patterns, and recurring issues."
-last-updated: "2026-01-02"
+last-updated: "2026-01-08"
+---
+
+## 🚨 CRITICAL: Git Branching Rules (READ FIRST)
+
+> **ALL AI AGENTS MUST FOLLOW THESE RULES. NO EXCEPTIONS.**
+
+### ❌ NEVER DO THIS
+- `git commit` directly on `main` → **FORBIDDEN**
+- `git commit` directly on `develop` → **FORBIDDEN**
+- `git push origin main` without going through `develop` → **FORBIDDEN**
+
+### ✅ ALWAYS DO THIS
+1. **Create a branch** for ANY change (feature, fix, chore):
+   ```bash
+   git checkout develop
+   git checkout -b feat/descriptive-name   # or fix/, chore/
+   ```
+2. **Make your changes** and commit to your branch
+3. **Push your branch** to origin:
+   ```bash
+   git push origin feat/descriptive-name
+   ```
+4. **Merge to develop** (integration branch):
+   ```bash
+   git checkout develop
+   git merge feat/descriptive-name
+   git push origin develop
+   ```
+5. **Delete your feature branch** after merge (optional but recommended)
+
+### Branch Naming Convention
+- `feat/TASK-ID-short-description` - New features
+- `fix/TASK-ID-short-description` - Bug fixes  
+- `chore/short-description` - Maintenance, refactoring
+
+### Why?
+- `main` = PRODUCTION = must ALWAYS work perfectly
+- `develop` = Integration testing before production
+- Feature branches = Safe isolation for experiments
+
 ---
 
 ## 🧠 Lessons Learned

@@ -8,7 +8,26 @@ version: "1.0"
 > Only checked skills will be loaded, reducing context window usage.
 > See `instruction-engine/.github/patterns/lazy-loading.pattern.md` for details.
 
-## 📌 Active Skills
+## � CRITICAL: Git Branching (ALL AGENTS MUST FOLLOW)
+
+**BEFORE making ANY code change:**
+```bash
+git checkout develop
+git checkout -b feat/your-feature   # or fix/, chore/
+```
+
+**AFTER completing work:**
+```bash
+git push origin feat/your-feature
+git checkout develop && git merge feat/your-feature && git push origin develop
+```
+
+> ❌ **NEVER** commit directly to `main` or `develop`
+> ✅ **ALWAYS** use feature branches (`feat/*`, `fix/*`, `chore/*`)
+
+---
+
+## �📌 Active Skills
 *Check the skills you need. Unchecked skills won't be loaded.*
 
 ### Core Development

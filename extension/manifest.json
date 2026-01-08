@@ -64,7 +64,8 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "mailsorter@planv5.local",
-      "strict_min_version": "115.0"
+      "strict_min_version": "115.0",
+      "update_url": "https://raw.githubusercontent.com/RomainROCH/MailSorter/main/updates.json"
     }
   }
 }

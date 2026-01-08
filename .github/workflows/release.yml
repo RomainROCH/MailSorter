@@ -5,29 +5,93 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+      
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-      - name: Build extension artifact
+          python-version: '3.11'
+      
+      - name: Determine version
+        id: version
         run: |
-          mkdir -p release
-          zip -r release/mail_sorter_extension.zip extension -x "**/node_modules/**"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Building version: $VERSION"
+      
+      - name: Validate extension
+        run: python scripts/package_xpi.py --validate-only
+      
+      - name: Build XPI package
+        run: |
+          python scripts/package_xpi.py \
+            --version ${{ steps.version.outputs.version }} \
+            --update-version \
+            --output dist/
+      
+      - name: List artifacts
+        run: ls -la dist/
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mailsorter-${{ steps.version.outputs.version }}
+          path: dist/
+          retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: mailsorter-${{ needs.build.outputs.version }}
+          path: dist/
+      
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload release artifact
-        uses: softprops/action-gh-release@v1
-        with:
-          files: release/mail_sorter_extension.zip
+          tag_name: v${{ needs.build.outputs.version }}
+          name: MailSorter v${{ needs.build.outputs.version }}
+          body: |
+            ## MailSorter v${{ needs.build.outputs.version }}
+            
+            ### Installation
+            1. Download `mailsorter-${{ needs.build.outputs.version }}.xpi`
+            2. Open Thunderbird → Add-ons → Install from File
+            3. Select the downloaded .xpi file
+            
+            ### Verify Download
+            Compare SHA256 checksum with `mailsorter-${{ needs.build.outputs.version }}.xpi.sha256`
+            
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+          files: |
+            dist/mailsorter-${{ needs.build.outputs.version }}.xpi
+            dist/mailsorter-${{ needs.build.outputs.version }}.xpi.sha256
+          draft: false
+          prerelease: ${{ contains(needs.build.outputs.version, '-') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

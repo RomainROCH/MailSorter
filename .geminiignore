@@ -1,0 +1,8 @@
+# Gemini Agent Ignore File
+# This file controls which files the Gemini/Antigravity agent can access
+# It is SEPARATE from .gitignore - Git behavior is unaffected
+
+# Re-include task files that are excluded by .gitignore
+# The agent respects .gitignore by default, but .geminiignore can override
+!.instructions/tasks.md
+!.instructions/raw.tasks.md

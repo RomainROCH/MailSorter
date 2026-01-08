@@ -1,64 +1,90 @@
-# MailSorter (Plan V5)
+# MailSorter
 
-![Version](https://img.shields.io/badge/version-0.1.0--alpha-orange) ![License](https://img.shields.io/badge/license-MIT-blue) ![Status](https://img.shields.io/badge/status-alpha-red)
+![Version](https://img.shields.io/badge/version-1.0.0-green) ![License](https://img.shields.io/badge/license-MIT-blue) ![Status](https://img.shields.io/badge/status-stable-green)
 
-**Version:** 0.1.0-alpha | [Changelog](CHANGELOG.md) | [Versioning Strategy](docs/VERSIONING.md)
+**Version:** 1.0.0 | [Changelog](CHANGELOG.md) | [User Guide](docs/USER_GUIDE.md)
 
-## Description
-Système de tri d'emails intelligent pour Thunderbird/Betterbird, utilisant des LLM locaux (Ollama) ou Cloud.
-Conçu avec une approche "Privacy First" et une architecture robuste (WebExtension + Native Messaging).
+> 🚀 **AI-powered email sorting for Thunderbird & Betterbird**
 
-**Performance observée** : 92-98% de précision sur dataset public en conditions contrôlées (voir [Plan V5](docs/PLAN_V5.md) pour méthodologie).
+## Overview
 
-## Documentation
-*   **[Plan V5](docs/PLAN_V5.md)** - Source de vérité du projet (spec complète)
-*   [Architecture Technique](docs/ARCHITECTURE.md)
-*   [Conformité RGPD & Sécurité](docs/RGPD.md)
+MailSorter is an intelligent email sorting extension that uses Large Language Models (LLMs) to automatically classify and organize your emails. Built with a **Privacy-First** approach using a hybrid WebExtension + Native Messaging architecture.
 
-## Prérequis
-*   Thunderbird 115+ ou Betterbird.
-*   Python 3.10+.
-*   Ollama (pour le mode local) installé et tournant (`ollama serve`).
-*   **Sur Windows : pour le développement et l'exécution des tests, exécuter l'environnement dans WSL (ex : Ubuntu).**
+**Key Features:**
+- 🤖 **Multiple LLM Providers** - Ollama (local), OpenAI, Anthropic, Google Gemini
+- 🔒 **Privacy-First** - PII scrubbing, headers-only mode, local processing option
+- 📊 **92-98% Accuracy** - Observed on public dataset benchmarks
+- ⚡ **Real-Time & Batch** - Sort new emails instantly or process archives in bulk
+- 🌍 **Multi-Language** - French and English interface
 
-## Installation
+## Quick Start
 
-### 1. Backend (Python)
 ```bash
-cd backend
-pip install -r requirements.txt
+# 1. Clone the repository
+git clone https://github.com/RomainROCH/MailSorter.git
+cd MailSorter
+
+# 2. Install Python dependencies
+cd backend && pip install -r requirements.txt && cd ..
+
+# 3. Register native messaging (Windows)
+installers\register.bat
+
+# 4. Install extension in Thunderbird
+# Menu → Add-ons → Install from File → select mailsorter-1.0.0.xpi
 ```
 
-### 2. Enregistrement Native Messaging
-Il faut déclarer le script Python à Thunderbird via une clé de registre (Windows) ou un fichier JSON (Linux/Mac).
-*   Éditez `backend/app_manifest.json` pour mettre le chemin absolu correct vers `main.py`.
-*   **Windows**: Ajoutez une clé de registre dans `HKCU\Software\Mozilla\NativeMessagingHosts\com.mailsorter.backend` pointant vers le fichier manifest.
+See the [User Guide](docs/USER_GUIDE.md) for detailed installation instructions.
 
-### 3. Extension (Thunderbird)
-*   Zippez le contenu du dossier `extension/`.
-*   Installez le `.xpi` ou chargez le dossier en mode "Debug Addons" dans Thunderbird.
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| 📖 [User Guide](docs/USER_GUIDE.md) | Installation, configuration, and usage |
+| 🔧 [Troubleshooting](docs/TROUBLESHOOTING.md) | Common issues and solutions |
+| 📋 [Compatibility Matrix](docs/COMPATIBILITY.md) | Supported versions and platforms |
+| 🏗️ [Architecture](docs/ARCHITECTURE.md) | Technical design and data flow |
+| 🔒 [RGPD Compliance](docs/RGPD.md) | Privacy and security details |
+| 📝 [Plan V5](docs/PLAN_V5.md) | Full specification |
+
+## Requirements
+
+| Component | Requirement |
+|-----------|-------------|
+| Email Client | Thunderbird 115+ or Betterbird |
+| Python | 3.10 or higher |
+| LLM | Ollama (local) or cloud API key |
+
+See [Compatibility Matrix](docs/COMPATIBILITY.md) for detailed requirements.
 
 ## Usage
-1.  Lancez Ollama : `ollama run llama3` (ou autre modèle).
-2.  Ouvrez Thunderbird.
-3.  Les nouveaux emails seront analysés et déplacés automatiquement.
-4.  Consultez les logs dans `~/.mailsorter/logs/` pour le debug.
 
-## ⚠️ Avertissement
-Ce code est une implémentation de référence du Plan V5.
-**Ne pas utiliser en production critique sans audit préalable.**
+1. **Configure** - Run the onboarding wizard or go to Settings
+2. **Map folders** - Connect categories to your email folders
+3. **Sort automatically** - New emails are classified in real-time
+4. **Manual sort** - Right-click → "Sort with MailSorter" or `Ctrl+Shift+M`
 
-**Statut actuel (v0.1.0-alpha)** :
-- ✅ Architecture fonctionnelle
-- ✅ Ollama provider opérationnel
-- ✅ Privacy Guard (scrubbing PII)
-- ⚠️ Configuration partiellement hardcodée
-- ⚠️ Parsing MIME simplifié
-- ❌ Pas d'installateur Windows automatique
-- ❌ Tests incomplets
+## Providers
+
+| Provider | Type | Privacy | Cost |
+|----------|------|---------|------|
+| **Ollama** | Local | ⭐⭐⭐⭐⭐ | Free |
+| **OpenAI** | Cloud | ⭐⭐⭐ | Paid |
+| **Anthropic** | Cloud | ⭐⭐⭐ | Paid |
+| **Gemini** | Cloud | ⭐⭐⭐ | Paid |
 
 ## Contributing
-Voir [CONTRIBUTING.md](CONTRIBUTING.md) pour les guidelines.
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Security
+
+For security vulnerabilities, please see [SECURITY.md](SECURITY.md).
 
 ## License
-MIT License - voir [LICENSE](LICENSE)
+
+MIT License - see [LICENSE](LICENSE)
+
+---
+
+*Made with ❤️ for email sanity*

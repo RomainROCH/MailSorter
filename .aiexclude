@@ -1,0 +1,6 @@
+# AI Exclude File for Gemini Code Assist
+# This file takes precedence over .gitignore for AI context
+
+# Re-include task files that are in .gitignore but needed by the agent
+!.instructions/tasks.md
+!.instructions/raw.tasks.md

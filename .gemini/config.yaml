@@ -1,0 +1,9 @@
+# Gemini Code Assist Configuration
+# Disable gitignore enforcement for this project
+
+settings:
+  respectGitignore: false
+  contextExclusionGitignore: false
+
+# Empty ignore_patterns to not exclude anything
+ignore_patterns: []

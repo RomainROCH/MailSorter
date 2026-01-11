@@ -23,9 +23,9 @@ async function initialize() {
     
     // Initialize state store (Phase 5)
     if (window.StateStore) {
-        stateStore = new window.StateStore();
-        await stateStore.load();
-        console.log("[StateStore] Loaded");
+        stateStore = window.StateStore;
+        await stateStore.init();
+        console.log("[StateStore] Initialized");
     }
     
     // Initialize undo manager (UX-005)
@@ -235,7 +235,11 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
         case 'set-passive-mode':
             passiveMode = message.enabled;
             if (stateStore) {
-                stateStore.set('passiveMode', passiveMode);
+                try {
+                    await stateStore.set('config.passiveMode', passiveMode);
+                } catch (_) {
+                    // ignore
+                }
             }
             return { success: true };
         

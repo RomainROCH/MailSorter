@@ -21,6 +21,7 @@ SERVICE_NAME = "mailsorter"
 # Try to import keyring, but don't fail if unavailable
 try:
     import keyring
+
     KEYRING_AVAILABLE = True
 except ImportError:
     KEYRING_AVAILABLE = False
@@ -38,17 +39,17 @@ def is_keyring_available() -> bool:
 def get_api_key(provider: str) -> Optional[str]:
     """
     Retrieve API key for a provider from secure storage.
-    
+
     Args:
         provider: Provider name (e.g., 'openai', 'anthropic', 'gemini')
-    
+
     Returns:
         API key string or None if not found
     """
     if not KEYRING_AVAILABLE:
         logger.warning(f"Keyring unavailable. Cannot retrieve API key for {provider}")
         return None
-    
+
     try:
         key = keyring.get_password(SERVICE_NAME, f"{provider}_api_key")
         if key:
@@ -62,11 +63,11 @@ def get_api_key(provider: str) -> Optional[str]:
 def set_api_key(provider: str, api_key: str) -> bool:
     """
     Store API key for a provider in secure storage.
-    
+
     Args:
         provider: Provider name (e.g., 'openai', 'anthropic', 'gemini')
         api_key: The API key to store
-    
+
     Returns:
         True if successful, False otherwise
     """
@@ -76,7 +77,7 @@ def set_api_key(provider: str, api_key: str) -> bool:
             "Install keyring package for secure storage."
         )
         return False
-    
+
     try:
         keyring.set_password(SERVICE_NAME, f"{provider}_api_key", api_key)
         logger.info(f"Stored API key for {provider} in keyring")
@@ -89,16 +90,16 @@ def set_api_key(provider: str, api_key: str) -> bool:
 def delete_api_key(provider: str) -> bool:
     """
     Remove API key for a provider from secure storage.
-    
+
     Args:
         provider: Provider name
-    
+
     Returns:
         True if successful, False otherwise
     """
     if not KEYRING_AVAILABLE:
         return False
-    
+
     try:
         keyring.delete_password(SERVICE_NAME, f"{provider}_api_key")
         logger.info(f"Deleted API key for {provider} from keyring")
@@ -114,13 +115,13 @@ def delete_api_key(provider: str) -> bool:
 def get_hmac_secret() -> Optional[str]:
     """
     Retrieve HMAC signing secret from secure storage.
-    
+
     Returns:
         HMAC secret string or None if not found
     """
     if not KEYRING_AVAILABLE:
         return None
-    
+
     try:
         return keyring.get_password(SERVICE_NAME, "hmac_secret")
     except Exception as e:
@@ -131,17 +132,17 @@ def get_hmac_secret() -> Optional[str]:
 def set_hmac_secret(secret: str) -> bool:
     """
     Store HMAC signing secret in secure storage.
-    
+
     Args:
         secret: The HMAC secret to store
-    
+
     Returns:
         True if successful, False otherwise
     """
     if not KEYRING_AVAILABLE:
         logger.error("Keyring unavailable. Cannot store HMAC secret.")
         return False
-    
+
     try:
         keyring.set_password(SERVICE_NAME, "hmac_secret", secret)
         logger.info("Stored HMAC secret in keyring")
@@ -154,9 +155,10 @@ def set_hmac_secret(secret: str) -> bool:
 def generate_hmac_secret() -> str:
     """
     Generate a cryptographically secure HMAC secret.
-    
+
     Returns:
         A 32-byte hex-encoded secret
     """
     import secrets
+
     return secrets.token_hex(32)

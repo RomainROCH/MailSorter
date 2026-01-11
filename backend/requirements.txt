@@ -14,6 +14,7 @@ pytest>=7.3.1
 pytest-cov>=4.1.0      # Coverage reporting
 pytest-mock>=3.12.0    # Mocking utilities
 requests-mock>=1.11.0  # HTTP request mocking
+pytest-timeout>=2.3.1  # Hard per-test timeout to prevent hangs
 
 # Optional: Cloud providers (install as needed)
 # These are optional - the code will work without them if you only use Ollama

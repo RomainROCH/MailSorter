@@ -20,12 +20,14 @@ logger = logging.getLogger(__name__)
 
 class ProcessingMode(Enum):
     """Processing mode for email classification."""
+
     REALTIME = "realtime"  # Immediate processing, one at a time
-    BATCH = "batch"        # Batch processing with progress tracking
+    BATCH = "batch"  # Batch processing with progress tracking
 
 
 class JobStatus(Enum):
     """Job lifecycle statuses (string values matching API expectations)."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -48,6 +50,7 @@ class BatchJob:
         results: detailed results
         error: optional error string
     """
+
     id: str
     emails: List[Dict]
     status: JobStatus = JobStatus.PENDING
@@ -91,32 +94,33 @@ class BatchJob:
             "error": self.error,
         }
 
+
 class BatchProcessor:
     """
     Batch processing manager for email classification.
-    
+
     Features:
     - Auto-detect processing mode from context
     - Batch job management with progress tracking
     - Rate limiting between batches
     - Cancellation support
-    
+
     Usage:
         processor = BatchProcessor(config)
-        
+
         # Auto-detect mode
         mode = processor.detect_mode({"count": 100, "source": "archive"})
-        
+
         if mode == ProcessingMode.BATCH:
             job_id = processor.create_job(email_ids)
             processor.start_job(job_id, classify_fn)
             status = processor.get_status(job_id)
     """
-    
+
     def __init__(self, config: Optional[Dict] = None):
         """
         Initialize batch processor.
-        
+
         Args:
             config: Configuration with:
                 - batch_size: Emails per batch (default: 50)
@@ -125,26 +129,26 @@ class BatchProcessor:
                 - realtime_threshold: Max emails for real-time (default: 5)
         """
         config = config or {}
-        
+
         self.batch_size = config.get("batch_size", 50)
         self.batch_delay = config.get("batch_delay", 0.5)
         self.max_concurrent = config.get("max_concurrent", 1)
         self.realtime_threshold = config.get("realtime_threshold", 5)
-        
+
         # Job storage
         self._jobs: Dict[str, BatchJob] = {}
         self._active_jobs: int = 0
         self._lock = threading.Lock()
-        
+
         # Cancellation flags
         self._cancel_flags: Dict[str, bool] = {}
-    
+
     def detect_mode(
         self,
         email_count: Optional[int] = None,
         force_mode: Optional[ProcessingMode] = None,
         source: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> ProcessingMode:
         """
         Auto-detect appropriate processing mode. Backwards-compatible wrapper for
@@ -163,7 +167,7 @@ class BatchProcessor:
             return force_mode
 
         # Build a context similar to previous implementation
-        ctx = {}
+        ctx: Dict[str, Any] = {}
         if source:
             ctx["source"] = source
         if email_count is not None:
@@ -179,17 +183,17 @@ class BatchProcessor:
             return ProcessingMode.REALTIME
 
         # Count-based detection
-        count = ctx.get("count", 1)
+        count = int(ctx.get("count", 1) or 0)
         if count > self.realtime_threshold:
             return ProcessingMode.BATCH
 
         # Age-based detection (old emails likely archive)
-        age_hours = ctx.get("email_age_hours", 0)
+        age_hours = float(ctx.get("email_age_hours", 0) or 0)
         if age_hours > 24 and count > 1:
             return ProcessingMode.BATCH
 
         return ProcessingMode.REALTIME
-    
+
     def create_job(self, emails: List[Dict]) -> BatchJob:
         """
         Create a new batch job (compat with older API that uses list of email dicts).
@@ -207,7 +211,7 @@ class BatchProcessor:
             emails=emails,
             status=JobStatus.PENDING,
             processed=0,
-            total=len(emails)
+            total=len(emails),
         )
 
         with self._lock:
@@ -216,12 +220,6 @@ class BatchProcessor:
 
         logger.info(f"Created batch job {job_id} with {len(emails)} emails")
         return job
-
-    # Backwards-compatible convenience methods expected by tests
-    def list_jobs(self) -> List[BatchJob]:
-        """List all current jobs."""
-        with self._lock:
-            return list(self._jobs.values())
 
     def get_job(self, job_id: str) -> Optional[BatchJob]:
         """Get a job object by id."""
@@ -232,35 +230,39 @@ class BatchProcessor:
         """Return basic statistics about jobs."""
         with self._lock:
             total = len(self._jobs)
-            pending = sum(1 for j in self._jobs.values() if j.status == JobStatus.PENDING)
-            running = sum(1 for j in self._jobs.values() if j.status == JobStatus.RUNNING)
+            pending = sum(
+                1 for j in self._jobs.values() if j.status == JobStatus.PENDING
+            )
+            running = sum(
+                1 for j in self._jobs.values() if j.status == JobStatus.RUNNING
+            )
             return {
                 "total_jobs": total,
                 "pending_jobs": pending,
                 "running_jobs": running,
             }
-    
+
     def get_status(self, job_id: str) -> Optional[Dict]:
         """
         Get status of a batch job.
-        
+
         Args:
             job_id: Job identifier
-        
+
         Returns:
             Status dict or None if job not found
         """
         with self._lock:
             job = self._jobs.get(job_id)
-        
+
         if not job:
             return None
-        
+
         elapsed = 0.0
         if job.started_at:
             end_time = job.completed_at or time.time()
             elapsed = end_time - job.started_at
-        
+
         return {
             "job_id": job_id,
             "status": job.status,
@@ -270,33 +272,33 @@ class BatchProcessor:
             "success_count": len(job.results.get("success", [])),
             "failed_count": len(job.results.get("failed", [])),
             "skipped_count": len(job.results.get("skipped", [])),
-            "error": job.error
+            "error": job.error,
         }
-    
+
     def get_results(self, job_id: str) -> Optional[Dict]:
         """
         Get detailed results of a completed job.
-        
+
         Args:
             job_id: Job identifier
-        
+
         Returns:
             Results dict or None if job not found
         """
         with self._lock:
             job = self._jobs.get(job_id)
-        
+
         if not job:
             return None
-        
+
         return {
             "job_id": job_id,
             "status": job.status,
             "results": job.results,
             "started_at": job.started_at,
-            "completed_at": job.completed_at
+            "completed_at": job.completed_at,
         }
-    
+
     def cancel_job(self, job_id: str) -> bool:
         """
         Cancel a job. If a job is still pending it will be marked cancelled
@@ -329,31 +331,35 @@ class BatchProcessor:
 
         return False
 
-    def batch_iterator(self, emails: List[Dict]):
+    def batch_iterator(self, emails: List[Dict[str, Any]]):
         """Yield lists of emails according to configured `batch_size`."""
         for i in range(0, len(emails), self.batch_size):
             yield emails[i : i + self.batch_size]
 
-    def process_realtime(self, email: Dict, classify_fn: Callable[[Dict], Optional[Dict]]):
+    def process_realtime(
+        self,
+        email: Dict[str, Any],
+        classify_fn: Callable[[Dict[str, Any]], Optional[Dict[str, Any]]],
+    ):
         """Process a single email immediately using classify_fn."""
         return classify_fn(email)
-    
+
     def start_job(
         self,
         job_id: str,
-        classify_fn: Callable[[str], Optional[Dict]],
-        progress_callback: Optional[Callable[[str, int, int], None]] = None
+        classify_fn: Callable[[Dict[str, Any]], Optional[Dict[str, Any]]],
+        progress_callback: Optional[Callable[[str, int, int], None]] = None,
     ) -> bool:
         """
         Start processing a batch job.
-        
+
         This runs synchronously. For async processing, use start_job_async.
-        
+
         Args:
             job_id: Job identifier
             classify_fn: Function that takes email_id and returns classification result
             progress_callback: Optional callback(job_id, current, total)
-        
+
         Returns:
             True if job completed successfully
         """
@@ -361,30 +367,30 @@ class BatchProcessor:
             job = self._jobs.get(job_id)
             if not job:
                 return False
-            
+
             if self._active_jobs >= self.max_concurrent:
                 job.status = JobStatus.PENDING
                 return False
-            
+
             self._active_jobs += 1
             job.status = JobStatus.RUNNING
             job.started_at = time.time()
-        
+
         try:
             self._process_job(job, classify_fn, progress_callback)
             return job.status == JobStatus.COMPLETED
         finally:
             with self._lock:
                 self._active_jobs -= 1
-    
+
     def _process_job(
         self,
         job: BatchJob,
-        classify_fn: Callable[[str], Optional[Dict]],
-        progress_callback: Optional[Callable[[str, int, int], None]] = None
+        classify_fn: Callable[[Dict[str, Any]], Optional[Dict[str, Any]]],
+        progress_callback: Optional[Callable[[str, int, int], None]] = None,
     ) -> None:
         """Internal job processing loop."""
-        
+
         for i, email in enumerate(job.emails):
             # Check for cancellation
             with self._lock:
@@ -398,18 +404,12 @@ class BatchProcessor:
                 result = classify_fn(email)
 
                 if result:
-                    job.results["success"].append({
-                        "email": email,
-                        "result": result
-                    })
+                    job.results["success"].append({"email": email, "result": result})
                 else:
                     job.results["skipped"].append(email)
 
             except Exception as e:
-                job.results["failed"].append({
-                    "email": email,
-                    "error": str(e)
-                })
+                job.results["failed"].append({"email": email, "error": str(e)})
                 logger.warning(f"Failed to process email {email}: {e}")
 
             # Update progress counters
@@ -437,21 +437,21 @@ class BatchProcessor:
             f"{len(job.results['skipped'])} skipped "
             f"in {elapsed:.1f}s"
         )
-    
+
     async def start_job_async(
         self,
         job_id: str,
-        classify_fn: Callable[[str], Optional[Dict]],
-        progress_callback: Optional[Callable[[str, int, int], None]] = None
+        classify_fn: Callable[[Dict[str, Any]], Optional[Dict[str, Any]]],
+        progress_callback: Optional[Callable[[str, int, int], None]] = None,
     ) -> bool:
         """
         Start processing a batch job asynchronously.
-        
+
         Args:
             job_id: Job identifier
             classify_fn: Function that takes email_id and returns result
             progress_callback: Optional callback(job_id, current, total)
-        
+
         Returns:
             True if job completed successfully
         """
@@ -459,27 +459,27 @@ class BatchProcessor:
             job = self._jobs.get(job_id)
             if not job:
                 return False
-            
+
             if self._active_jobs >= self.max_concurrent:
                 job.status = JobStatus.PENDING
                 return False
-            
+
             self._active_jobs += 1
             job.status = JobStatus.RUNNING
             job.started_at = time.time()
-        
+
         try:
             await self._process_job_async(job, classify_fn, progress_callback)
             return job.status == JobStatus.COMPLETED
         finally:
             with self._lock:
                 self._active_jobs -= 1
-    
+
     async def _process_job_async(
         self,
         job: BatchJob,
-        classify_fn: Callable[[Dict], Optional[Dict]],
-        progress_callback: Optional[Callable[[str, int, int], None]] = None
+        classify_fn: Callable[[Dict[str, Any]], Optional[Dict[str, Any]]],
+        progress_callback: Optional[Callable[[str, int, int], None]] = None,
     ) -> None:
         """Internal async job processing loop."""
 
@@ -496,18 +496,12 @@ class BatchProcessor:
                 result = await asyncio.to_thread(classify_fn, email)
 
                 if result:
-                    job.results["success"].append({
-                        "email": email,
-                        "result": result
-                    })
+                    job.results["success"].append({"email": email, "result": result})
                 else:
                     job.results["skipped"].append(email)
 
             except Exception as e:
-                job.results["failed"].append({
-                    "email": email,
-                    "error": str(e)
-                })
+                job.results["failed"].append({"email": email, "error": str(e)})
 
             # Update progress counters
             job.processed = i + 1
@@ -524,24 +518,28 @@ class BatchProcessor:
 
         job.status = JobStatus.COMPLETED
         job.completed_at = time.time()
-    
+
     def cleanup_old_jobs(self, max_age_hours: int = 24) -> int:
         """
         Remove completed jobs older than max_age.
-        
+
         Args:
             max_age_hours: Maximum job age in hours
-        
+
         Returns:
             Number of jobs removed
         """
         cutoff = time.time() - (max_age_hours * 3600)
         removed = 0
-        
+
         with self._lock:
             to_remove = []
             for job_id, job in self._jobs.items():
-                if job.status in (JobStatus.COMPLETED, JobStatus.CANCELLED, JobStatus.FAILED):
+                if job.status in (
+                    JobStatus.COMPLETED,
+                    JobStatus.CANCELLED,
+                    JobStatus.FAILED,
+                ):
                     if job.completed_at and job.completed_at < cutoff:
                         to_remove.append(job_id)
 
@@ -549,12 +547,12 @@ class BatchProcessor:
                 del self._jobs[job_id]
                 self._cancel_flags.pop(job_id, None)
                 removed += 1
-        
+
         if removed:
             logger.debug(f"Cleaned up {removed} old batch jobs")
-        
+
         return removed
-    
+
     def list_jobs(self) -> List[BatchJob]:
         """List all jobs (BatchJob objects)."""
         with self._lock:
@@ -569,15 +567,15 @@ _processor_lock = threading.Lock()
 def get_batch_processor(config: Optional[Dict] = None) -> BatchProcessor:
     """
     Get or create the global batch processor.
-    
+
     Args:
         config: Optional configuration dict
-    
+
     Returns:
         Global BatchProcessor instance
     """
     global _batch_processor
-    
+
     with _processor_lock:
         if _batch_processor is None:
             _batch_processor = BatchProcessor(config)
@@ -594,26 +592,3 @@ def reset_processor() -> None:
     global _batch_processor
     with _processor_lock:
         _batch_processor = None
-
-
-# Global batch processor instance
-_batch_processor: Optional[BatchProcessor] = None
-_processor_lock = threading.Lock()
-
-
-def get_batch_processor(config: Optional[Dict] = None) -> BatchProcessor:
-    """
-    Get or create the global batch processor.
-    
-    Args:
-        config: Optional configuration dict
-    
-    Returns:
-        Global BatchProcessor instance
-    """
-    global _batch_processor
-    
-    with _processor_lock:
-        if _batch_processor is None:
-            _batch_processor = BatchProcessor(config)
-        return _batch_processor

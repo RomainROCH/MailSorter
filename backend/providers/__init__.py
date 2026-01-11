@@ -16,19 +16,30 @@ from .base import ClassificationResult, LLMProvider
 from .factory import ProviderFactory
 from .ollama_provider import OllamaProvider
 
+from typing import Optional, Type
+
 # Optional cloud providers (may not be configured)
+OpenAIProvider: Optional[Type[LLMProvider]]
 try:
-    from .openai_provider import OpenAIProvider
+    from .openai_provider import OpenAIProvider as _OpenAIProvider
+
+    OpenAIProvider = _OpenAIProvider
 except ImportError:
     OpenAIProvider = None
 
+AnthropicProvider: Optional[Type[LLMProvider]]
 try:
-    from .anthropic_provider import AnthropicProvider
+    from .anthropic_provider import AnthropicProvider as _AnthropicProvider
+
+    AnthropicProvider = _AnthropicProvider
 except ImportError:
     AnthropicProvider = None
 
+GeminiProvider: Optional[Type[LLMProvider]]
 try:
-    from .gemini_provider import GeminiProvider
+    from .gemini_provider import GeminiProvider as _GeminiProvider
+
+    GeminiProvider = _GeminiProvider
 except ImportError:
     GeminiProvider = None
 

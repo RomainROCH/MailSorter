@@ -19,13 +19,13 @@ from ..utils.secrets import get_api_key
 class OpenAIProvider(LLMProvider):
     """
     OpenAI provider for cloud LLM inference.
-    
+
     Features:
     - GPT-4o-mini (cost-effective) and GPT-4o support
     - Structured JSON output with confidence scores
     - Token usage tracking for cost monitoring
     - Automatic API key retrieval from keyring
-    
+
     Cost Optimization:
     - Uses gpt-4o-mini by default (10x cheaper than GPT-4)
     - Low max_tokens (150) for classification
@@ -49,7 +49,7 @@ Rules:
     def __init__(self, config: Optional[Dict] = None):
         """
         Initialize OpenAI provider.
-        
+
         Args:
             config: Provider configuration with:
                 - model: Model name (default: gpt-4o-mini)
@@ -66,7 +66,7 @@ Rules:
         self.timeout = config.get("timeout", 30)
         self.max_tokens = config.get("max_tokens", 150)
         self.temperature = config.get("temperature", 0.1)
-        
+
         if not self.api_key:
             raise ValueError(
                 "OpenAI API key not configured. "
@@ -93,17 +93,17 @@ Rules:
             response = requests.get(
                 f"{self.base_url}/models",
                 headers={"Authorization": f"Bearer {self.api_key}"},
-                timeout=10
+                timeout=10,
             )
-            
+
             if response.status_code == 401:
                 logger.error("OpenAI API key is invalid")
                 return False
-            
+
             if response.status_code == 429:
                 logger.warning("OpenAI rate limit hit during health check")
                 return True  # API is reachable, just rate limited
-            
+
             return response.status_code == 200
         except requests.exceptions.Timeout:
             logger.warning("OpenAI health check timed out")
@@ -113,56 +113,60 @@ Rules:
             return False
 
     def classify_email(
-        self, 
-        subject: str, 
-        body: str, 
+        self,
+        subject: str,
+        body: str,
         available_folders: List[str],
-        prompt_template: Optional[str] = None
+        prompt_template: Optional[str] = None,
     ) -> Optional[ClassificationResult]:
         """
         Classify email using OpenAI with structured JSON output.
         """
         start_time = time.time()
-        
+
         # Build user message
-        user_message = self._build_user_message(subject, body, available_folders, prompt_template)
-        
+        user_message = self._build_user_message(
+            subject, body, available_folders, prompt_template
+        )
+
         try:
             response = requests.post(
                 f"{self.base_url}/chat/completions",
                 headers={
                     "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
                 json={
                     "model": self.model,
                     "messages": [
                         {"role": "system", "content": self.SYSTEM_PROMPT},
-                        {"role": "user", "content": user_message}
+                        {"role": "user", "content": user_message},
                     ],
                     "response_format": {"type": "json_object"},
                     "max_tokens": self.max_tokens,
-                    "temperature": self.temperature
+                    "temperature": self.temperature,
                 },
-                timeout=self.timeout
+                timeout=self.timeout,
             )
-            
+
             latency_ms = int((time.time() - start_time) * 1000)
-            
+
             if response.status_code == 429:
                 logger.warning("OpenAI rate limit exceeded")
                 return None
-            
+
             response.raise_for_status()
             data = response.json()
-            
+
             # Extract response content
             content = data["choices"][0]["message"]["content"]
             tokens_used = data.get("usage", {}).get("total_tokens", 0)
-            
+
             # Parse JSON response
-            return self._parse_response(content, available_folders, tokens_used, latency_ms)
-            
+            return self._parse_response(
+                content, available_folders, tokens_used, latency_ms
+            )
+
         except requests.exceptions.Timeout:
             logger.error("OpenAI request timed out")
             return None
@@ -174,19 +178,19 @@ Rules:
             return None
 
     def _build_user_message(
-        self, 
-        subject: str, 
-        body: str, 
+        self,
+        subject: str,
+        body: str,
         folders: List[str],
-        template: Optional[str] = None
+        template: Optional[str] = None,
     ) -> str:
         """Build the user message for classification."""
         if template:
             return template
-        
+
         folders_str = json.dumps(folders)
         body_snippet = body[:1500] if body else "(no body)"
-        
+
         return f"""Classify this email into one of the available folders.
 
 Available folders: {folders_str}
@@ -197,11 +201,11 @@ Email Body: {body_snippet}
 Respond with JSON only."""
 
     def _parse_response(
-        self, 
-        content: str, 
+        self,
+        content: str,
         available_folders: List[str],
         tokens_used: int,
-        latency_ms: int
+        latency_ms: int,
     ) -> Optional[ClassificationResult]:
         """Parse and validate the JSON response."""
         try:
@@ -209,7 +213,7 @@ Respond with JSON only."""
             folder = str(data.get("folder", "")).strip()
             confidence = float(data.get("confidence", 0.5))
             reasoning = data.get("reasoning")
-            
+
             # Validate folder exists
             if folder not in available_folders:
                 # Try case-insensitive match
@@ -221,21 +225,23 @@ Respond with JSON only."""
                 else:
                     # Fallback to Inbox
                     if "Inbox" in available_folders:
-                        logger.warning(f"OpenAI suggested invalid folder '{folder}', using Inbox")
+                        logger.warning(
+                            f"OpenAI suggested invalid folder '{folder}', using Inbox"
+                        )
                         folder = "Inbox"
                         confidence = min(confidence, 0.4)
                     else:
                         return None
-            
+
             return ClassificationResult(
                 folder=folder,
                 confidence=min(max(confidence, 0.0), 1.0),
                 reasoning=reasoning,
                 tokens_used=tokens_used,
                 latency_ms=latency_ms,
-                source="llm"
+                source="llm",
             )
-            
+
         except (json.JSONDecodeError, ValueError, TypeError) as e:
             logger.error(f"Failed to parse OpenAI response: {e}")
             return None

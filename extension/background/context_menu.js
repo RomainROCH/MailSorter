@@ -24,8 +24,8 @@ const ContextMenu = {
                 title: browser.i18n.getMessage('context_menu_sort') || 'Sort with MailSorter',
                 contexts: ['message_list'],
                 icons: {
-                    "16": "icons/icon-16.png",
-                    "32": "icons/icon-32.png"
+                    "16": "icons/icon-16.svg",
+                    "32": "icons/icon-32.svg"
                 }
             });
             
@@ -35,8 +35,8 @@ const ContextMenu = {
                 title: browser.i18n.getMessage('context_menu_sort_selection') || 'Sort selected emails',
                 contexts: ['message_list'],
                 icons: {
-                    "16": "icons/icon-16.png",
-                    "32": "icons/icon-32.png"
+                    "16": "icons/icon-16.svg",
+                    "32": "icons/icon-32.svg"
                 }
             });
             
@@ -227,7 +227,7 @@ const ContextMenu = {
                 type: 'basic',
                 title: browser.i18n.getMessage('bulk_progress_title') || 'Sorting emails...',
                 message: message,
-                iconUrl: 'icons/icon-48.png'
+                iconUrl: 'icons/icon-48.svg'
             });
         } catch (e) {
             console.warn('[ContextMenu] Could not show progress notification:', e);
@@ -247,7 +247,7 @@ const ContextMenu = {
                 type: 'basic',
                 title: 'MailSorter',
                 message: message,
-                iconUrl: 'icons/icon-48.png'
+                iconUrl: 'icons/icon-48.svg'
             });
         } catch (e) {
             console.warn('[ContextMenu] Could not show completion notification:', e);

@@ -1,7 +1,12 @@
 {
   "addons": {
     "mailsorter@planv5.local": {
-      "updates": []
+      "updates": [
+        {
+          "version": "1.0.10",
+          "update_link": "https://raw.githubusercontent.com/RomainROCH/MailSorter/main/dist/mailsorter-1.0.10.xpi"
+        }
+      ]
     }
   }
 }

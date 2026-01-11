@@ -21,13 +21,13 @@ class GeminiProvider(LLMProvider):
     Google Gemini provider for cloud LLM inference.
 
     Features:
-    - Gemini 1.5 Flash (fast/cheap) and Pro support
+    - Gemini 2.0 Flash (fast/cheap) and Pro support
     - Structured JSON output with confidence scores
     - Token usage tracking for cost monitoring
     - Automatic API key retrieval from keyring
 
     Cost Optimization:
-    - Uses gemini-1.5-flash by default (cheapest Gemini model)
+    - Uses gemini-2.0-flash by default (cheapest Gemini model)
     - Low max_tokens for classification
     - Structured prompting for consistent output
     """
@@ -50,13 +50,13 @@ Rules:
 
         Args:
             config: Provider configuration with:
-                - model: Model name (default: gemini-1.5-flash)
+                - model: Model name (default: gemini-2.0-flash)
                 - api_key: API key (or retrieved from keyring)
                 - timeout: Request timeout in seconds
                 - max_tokens: Maximum response tokens
         """
         config = config or {}
-        self.model = config.get("model", "gemini-1.5-flash")
+        self.model = config.get("model", "gemini-2.0-flash")
         self.api_key = config.get("api_key") or get_api_key("gemini")
         self.timeout = config.get("timeout", 30)
         self.max_tokens = config.get("max_tokens", 150)

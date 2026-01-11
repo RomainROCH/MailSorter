@@ -2,12 +2,18 @@
  * MailSorter Options Page Styles
  */
 
+/* Ensure the HTML `hidden` attribute behaves consistently in Betterbird/Thunderbird */
+[hidden] {
+    display: none !important;
+}
+
 /* Layout */
 .options-container {
     max-width: 800px;
     margin: 0 auto;
     padding: var(--ms-space-lg);
-    min-height: 100vh;
+    /* Avoid forcing huge empty space in the add-ons manager */
+    min-height: auto;
 }
 
 .options-header {
@@ -43,6 +49,17 @@
 /* Cards */
 .ms-card {
     margin-bottom: var(--ms-space-lg);
+}
+
+.category-item.ms-selected {
+    outline: 2px solid var(--ms-category-accent, var(--ms-color-primary));
+    outline-offset: 2px;
+}
+
+/* Dragging must start on the draggable <li>, not child <span> elements */
+.category-item > *,
+.folder-item > * {
+    pointer-events: none;
 }
 
 /* Options Actions */
@@ -150,11 +167,22 @@
     display: flex;
     gap: var(--ms-space-lg);
     margin: var(--ms-space-lg) 0;
+    align-items: stretch;
 }
 
 .folder-mapper-categories,
 .folder-mapper-folders {
     flex: 1;
+}
+
+/* Compact + allow long names without truncation */
+.folder-mapper-categories {
+    flex: 0 0 240px;
+    min-width: 220px;
+}
+
+.folder-mapper-folders {
+    flex: 1 1 auto;
 }
 
 .folder-mapper-categories h3,
@@ -181,8 +209,16 @@
     overflow-y: auto;
 }
 
+.category-list .ms-list-item,
+.folder-list .ms-list-item {
+    padding: var(--ms-space-xs) var(--ms-space-sm);
+    align-items: flex-start;
+}
+
 .category-item {
     cursor: grab;
+    border: 2px solid transparent;
+    border-radius: var(--ms-radius-sm);
 }
 
 .category-item:active {
@@ -194,13 +230,39 @@
     background-color: var(--ms-color-primary-light);
 }
 
+.category-item.mapped {
+    border-color: var(--ms-category-accent, var(--ms-color-primary));
+}
+
+.category-item[data-category="newsletters"] { --ms-category-accent: var(--ms-category-newsletters); }
+.category-item[data-category="invoices"] { --ms-category-accent: var(--ms-category-invoices); }
+.category-item[data-category="work"] { --ms-category-accent: var(--ms-category-work); }
+.category-item[data-category="personal"] { --ms-category-accent: var(--ms-category-personal); }
+.category-item[data-category="support"] { --ms-category-accent: var(--ms-category-support); }
+.category-item[data-category="social"] { --ms-category-accent: var(--ms-category-social); }
+.category-item[data-category="promotions"] { --ms-category-accent: var(--ms-category-promotions); }
+
 .category-icon {
     font-size: var(--ms-font-size-lg);
 }
 
+.category-label {
+    white-space: normal;
+    overflow: visible;
+    word-break: break-word;
+}
+
+.category-mapped-to {
+    margin-left: auto;
+    font-size: var(--ms-font-size-xs);
+    color: var(--ms-color-text-secondary);
+    opacity: 0.9;
+}
+
 .folder-item.drag-over {
     background-color: var(--ms-color-primary-light);
-    border: 2px dashed var(--ms-color-primary);
+    outline: 2px solid var(--ms-color-primary);
+    outline-offset: -2px;
 }
 
 .folder-name {
@@ -210,6 +272,40 @@
 .folder-account {
     font-size: var(--ms-font-size-xs);
 }
+
+.folder-tags {
+    display: flex;
+    gap: var(--ms-space-2xs);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-content: flex-start;
+    pointer-events: auto;
+}
+
+.folder-tags * {
+    pointer-events: auto;
+}
+
+.folder-tag {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ms-radius-sm);
+    border: 1px solid var(--ms-category-accent, var(--ms-color-border));
+    background-color: var(--ms-color-background);
+    font-size: 13px;
+    line-height: 1;
+}
+
+.folder-tag[data-category="newsletters"] { --ms-category-accent: var(--ms-category-newsletters); }
+.folder-tag[data-category="invoices"] { --ms-category-accent: var(--ms-category-invoices); }
+.folder-tag[data-category="work"] { --ms-category-accent: var(--ms-category-work); }
+.folder-tag[data-category="personal"] { --ms-category-accent: var(--ms-category-personal); }
+.folder-tag[data-category="support"] { --ms-category-accent: var(--ms-category-support); }
+.folder-tag[data-category="social"] { --ms-category-accent: var(--ms-category-social); }
+.folder-tag[data-category="promotions"] { --ms-category-accent: var(--ms-category-promotions); }
 
 /* Current Mappings */
 .current-mappings {
@@ -228,6 +324,12 @@
     display: flex;
     align-items: center;
     gap: var(--ms-space-sm);
+}
+
+.ms-highlight {
+    outline: 2px solid var(--ms-category-accent, var(--ms-color-primary));
+    outline-offset: 2px;
+    border-radius: var(--ms-radius-sm);
 }
 
 .mapping-category {
@@ -280,6 +382,31 @@
     color: var(--ms-color-primary);
 }
 
+.mapping-item {
+    border-left: 4px solid var(--ms-category-accent, var(--ms-color-primary));
+}
+
+.mapping-item.ms-highlight {
+    outline: 2px solid var(--ms-category-accent, var(--ms-color-primary));
+    outline-offset: 2px;
+    border-radius: var(--ms-radius-sm);
+}
+
+.folder-item.mapped {
+    /* Single outline that can include multiple category colors */
+    border: 2px solid transparent;
+    border-radius: var(--ms-radius-md);
+    background:
+      linear-gradient(var(--ms-color-background), var(--ms-color-background)) padding-box,
+      var(--ms-folder-outline, linear-gradient(90deg, var(--ms-color-primary), var(--ms-color-primary))) border-box;
+}
+
+.folder-item.mapped:hover {
+        background:
+            linear-gradient(var(--ms-color-surface), var(--ms-color-surface)) padding-box,
+            var(--ms-folder-outline, linear-gradient(90deg, var(--ms-color-primary), var(--ms-color-primary))) border-box;
+}
+
 /* Footer */
 .options-footer {
     display: flex;
@@ -292,6 +419,55 @@
     position: sticky;
     bottom: 0;
     background-color: var(--ms-color-background);
+    z-index: calc(var(--ms-z-toast) - 1);
+}
+
+/* Toasts anchored to footer (near version), so they don't cover content */
+.options-footer .ms-toast-container {
+    position: absolute;
+    bottom: calc(100% + var(--ms-space-sm));
+    left: 0;
+    right: auto;
+    margin: 0;
+    max-width: 360px;
+    align-items: flex-start;
+}
+
+.ms-toast {
+    position: relative;
+    align-items: center;
+    padding: var(--ms-space-sm) var(--ms-space-md);
+}
+
+.ms-toast-message {
+    color: var(--ms-color-text);
+    text-align: center;
+    line-height: var(--ms-line-height-normal);
+}
+
+.ms-toast-close {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    line-height: 1;
+    border-radius: var(--ms-radius-sm);
+    opacity: 0.75;
+}
+
+.ms-toast-close:hover {
+    opacity: 1;
+    background-color: var(--ms-color-surface-hover);
+}
+
+.ms-version {
+    margin-right: auto;
+    color: var(--ms-color-text-secondary);
+    font-size: var(--ms-font-size-xs);
+    user-select: text;
+    opacity: 0.85;
 }
 
 .save-status {

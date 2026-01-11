@@ -187,14 +187,21 @@ function updateBackendStatus(connected) {
  */
 function updateLLMStatus(connected, providerName = null) {
     const dot = elements.llmStatus.querySelector('.ms-status-dot');
-    
-    dot.className = 'ms-status-dot ' + 
-        (connected ? 'ms-status-dot-connected' : 'ms-status-dot-disconnected');
-    
-    elements.llmName.textContent = providerName || '-';
-    
-    elements.llmStatus.className = 'ms-status-badge ' + 
-        (connected ? 'ms-status-badge-success' : 'ms-status-badge-error');
+
+    // `connected` can be true/false/null (unknown)
+    const isUnknown = connected === null || typeof connected === 'undefined';
+
+    dot.className = 'ms-status-dot ' +
+        (isUnknown
+            ? 'ms-status-dot-warning'
+            : (connected ? 'ms-status-dot-connected' : 'ms-status-dot-disconnected'));
+
+    elements.llmName.textContent = providerName || (isUnknown ? 'Unknown' : '-');
+
+    elements.llmStatus.className = 'ms-status-badge ' +
+        (isUnknown
+            ? 'ms-status-badge-warning'
+            : (connected ? 'ms-status-badge-success' : 'ms-status-badge-error'));
 }
 
 /**

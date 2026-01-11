@@ -240,9 +240,9 @@ async function runConnectionTest() {
         let llmOk = false;
         
         try {
-            const response = await browser.runtime.sendMessage({ type: 'health-check' });
-            backendOk = response && response.status === 'ok';
-            llmOk = response?.provider?.healthy || false;
+            const response = await browser.runtime.sendMessage({ type: 'test-connection' });
+            backendOk = response && (response.status === 'ok' || response.status === 'degraded');
+            llmOk = response?.provider?.healthy === true;
         } catch (e) {
             console.warn('[Onboarding] Health check failed:', e);
         }

@@ -74,9 +74,7 @@ const ErrorHandler = {
         try {
             // Use browser notifications API if available
             if (browser.notifications && browser.notifications.create) {
-                const iconPath = severity === this.SEVERITY.CRITICAL 
-                    ? 'icons/icon-error.png' 
-                    : 'icons/icon-48.png';
+                const iconPath = 'icons/icon-48.svg';
                 
                 await browser.notifications.create({
                     type: 'basic',

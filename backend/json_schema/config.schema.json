@@ -44,7 +44,7 @@
         "gemini": {
           "type": "object",
           "properties": {
-            "model": {"type": "string", "default": "gemini-1.5-flash"},
+            "model": {"type": "string", "default": "gemini-2.0-flash"},
             "timeout": {"type": "integer", "minimum": 5, "default": 30},
             "max_tokens": {"type": "integer", "minimum": 50, "default": 150}
           }

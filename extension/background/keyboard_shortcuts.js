@@ -105,7 +105,7 @@ const KeyboardShortcuts = {
                     type: 'basic',
                     title: 'MailSorter',
                     message: 'Please select an email to classify',
-                    iconUrl: 'icons/icon-48.png'
+                    iconUrl: 'icons/icon-48.svg'
                 });
             } catch (e) {
                 console.warn('[KeyboardShortcuts] Could not show notification:', e);

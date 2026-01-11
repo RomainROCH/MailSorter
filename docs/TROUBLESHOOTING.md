@@ -63,6 +63,17 @@
 | Python not found | Install Python 3.10+ and add to PATH |
 | Registry key missing | Run `installers/register.bat` (Windows) |
 | Manifest path wrong | Edit `app_manifest.json` with correct absolute path |
+
+## Windows: Native host "Native request timed out"
+
+On Windows, the native messaging host **must be an executable** that speaks the Native Messaging protocol over stdin/stdout.
+
+If the Options page shows `Native request timed out`, install the native host using the provided script:
+
+- Build (dev): `powershell -ExecutionPolicy Bypass -File scripts\\build_native_host_windows.ps1`
+- Install/register: `powershell -ExecutionPolicy Bypass -File installers\\install_windows.ps1`
+
+Then restart Thunderbird/Betterbird.
 | Permissions issue | `chmod +x backend/main.py` (Linux/macOS) |
 | Missing dependencies | `pip install -r backend/requirements.txt` |
 

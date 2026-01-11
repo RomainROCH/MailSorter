@@ -207,7 +207,7 @@ class TestGeminiProvider:
     def setup_method(self):
         """Setup test fixtures."""
         self.config = {
-            "model": "gemini-1.5-flash",
+            "model": "gemini-2.0-flash",
             "api_key": "test-gemini-key",
             "temperature": 0.1,
             "max_tokens": 150,

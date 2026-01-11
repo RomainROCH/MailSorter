@@ -7,9 +7,21 @@
 let currentConfig = {};
 let isDirty = false;
 let folders = [];
+let userFoldersForMapping = [];
+
+// Autosave (debounced)
+let _autoSaveTimer = null;
+let _autoSaveInProgress = false;
 
 // DOM Elements
 const elements = {};
+
+function setVisible(el, visible) {
+    if (!el) return;
+    // Be robust across Betterbird/Thunderbird surfaces
+    el.hidden = !visible;
+    el.style.display = visible ? '' : 'none';
+}
 
 /**
  * Initialize the options page
@@ -17,6 +29,22 @@ const elements = {};
 async function init() {
     // Cache DOM elements
     cacheElements();
+
+    // Force a clean initial UI state (prevents "Saving..." or spinners from showing)
+    setVisible(elements.saveStatus, false);
+    setVisible(elements.testSpinner, false);
+    setVisible(elements.testResult, false);
+
+    // Render version so we can confirm the correct build is installed
+    try {
+        const manifest = browser.runtime.getManifest();
+        const versionEl = document.getElementById('ms-version');
+        if (versionEl && manifest?.version) {
+            versionEl.textContent = `MailSorter v${manifest.version}`;
+        }
+    } catch (e) {
+        // ignore
+    }
     
     // Apply translations
     if (window.I18n) {
@@ -25,9 +53,46 @@ async function init() {
     
     // Set up tab navigation
     setupTabs();
+
+    // Safety: while options is open, pause automatic moving (prevents accidental sorting)
+    try {
+        await browser.runtime.sendMessage({ type: 'options-editing', enabled: true });
+    } catch (_) {
+        // ignore
+    }
+
+    const endEditing = async () => {
+        try {
+            await browser.runtime.sendMessage({ type: 'options-editing', enabled: false });
+        } catch (_) {
+            // ignore
+        }
+    };
+        const flushAndClose = () => {
+            // Best-effort flush (important if user closes immediately after mapping).
+            if (isDirty) {
+                try {
+                    browser.storage.local.set({ config: currentConfig });
+                    browser.runtime.sendMessage({ type: 'config-updated', config: currentConfig });
+                } catch (e) {
+                    // ignore
+                }
+            }
+            try {
+                browser.runtime.sendMessage({ type: 'options-editing', enabled: false });
+            } catch (e) {
+                // ignore
+            }
+        };
+
+        window.addEventListener('pagehide', flushAndClose);
+        window.addEventListener('unload', flushAndClose);
     
     // Load configuration
     await loadConfiguration();
+
+    // Load UI-only preferences into controls
+    await loadUiPreferences();
     
     // Load folders for mapping
     await loadFolders();
@@ -76,6 +141,17 @@ function cacheElements() {
     elements.resetSettings = document.getElementById('reset-settings');
     elements.toastContainer = document.getElementById('toast-container');
     elements.liveRegion = document.getElementById('live-region');
+    elements.fontMode = document.getElementById('font-mode');
+}
+
+async function loadUiPreferences() {
+    if (!elements.fontMode) return;
+    try {
+        const mode = await window.MSUiPrefs?.getFontMode?.();
+        if (mode) elements.fontMode.value = mode;
+    } catch (_) {
+        // ignore
+    }
 }
 
 /**
@@ -217,12 +293,16 @@ async function loadFolders() {
         // Filter out system folders
         const systemFolders = window.MS_CONSTANTS?.SYSTEM_FOLDERS || [];
         const userFolders = folders.filter(f => !systemFolders.includes(f.name));
+        userFoldersForMapping = userFolders;
         
         // Populate folder list
         renderFolderList(userFolders);
         
         // Populate categories
         renderCategoryList();
+
+        // Apply mapping visuals (mapped indicators + folder tags)
+        renderMappingVisuals();
         
         console.log('[Options] Loaded folders:', folders.length);
         
@@ -262,21 +342,25 @@ async function getAllFolders(account) {
  */
 function renderCategoryList() {
     const categories = window.MS_CONSTANTS?.DEFAULT_CATEGORIES || [];
+    const usePointerDrag = typeof window.PointerEvent !== 'undefined';
     
     elements.categoryList.innerHTML = categories.map(cat => `
         <li class="ms-list-item ms-draggable category-item" 
-            draggable="true" 
+            draggable="${usePointerDrag ? 'false' : 'true'}" 
             data-category="${cat.id}"
             role="option"
             tabindex="0"
             aria-grabbed="false">
             <span class="category-icon">${cat.icon}</span>
             <span class="category-label">${cat.label}</span>
+            <span class="category-mapped-to" aria-hidden="true"></span>
         </li>
     `).join('');
     
     // Set up drag events
     setupDragAndDrop();
+
+    renderMappingVisuals();
 }
 
 /**
@@ -284,7 +368,7 @@ function renderCategoryList() {
  */
 function renderFolderList(folderList) {
     elements.folderList.innerHTML = folderList.map(folder => `
-        <li class="ms-list-item ms-droppable folder-item" 
+        <li class="ms-list-item folder-item" 
             data-folder-path="${folder.fullPath || folder.path}"
             data-folder-name="${folder.name}"
             role="option"
@@ -293,8 +377,14 @@ function renderFolderList(folderList) {
             <span class="folder-icon">📁</span>
             <span class="folder-name">${folder.name}</span>
             <span class="folder-account ms-text-secondary">${folder.accountName || ''}</span>
+            <span class="folder-tags" aria-label=""></span>
         </li>
     `).join('');
+
+    // Re-bind listeners for newly rendered targets
+    setupDragAndDrop();
+
+    renderMappingVisuals();
 }
 
 /**
@@ -305,33 +395,177 @@ function setupDragAndDrop() {
     const folderItems = elements.folderList.querySelectorAll('.folder-item');
     
     categories.forEach(cat => {
+        if (cat.dataset.msBound === '1') return;
+        cat.dataset.msBound = '1';
+
         cat.addEventListener('dragstart', handleDragStart);
         cat.addEventListener('dragend', handleDragEnd);
+        cat.addEventListener('click', handleCategoryClick);
+
+        // Betterbird-friendly pseudo-drag using Pointer Events (HTML5 DnD can be unreliable)
+        cat.addEventListener('pointerdown', handlePointerDown);
         
         // Keyboard support
         cat.addEventListener('keydown', handleDragKeydown);
     });
     
     folderItems.forEach(folder => {
+        if (folder.dataset.msBound === '1') return;
+        folder.dataset.msBound = '1';
+
         folder.addEventListener('dragover', handleDragOver);
         folder.addEventListener('dragleave', handleDragLeave);
         folder.addEventListener('drop', handleDrop);
+        folder.addEventListener('click', handleFolderClick);
+
+        // Keyboard support: apply mapping when a category is "grabbed"
+        folder.addEventListener('keydown', handleFolderKeydown);
     });
+
+    // Global pointer listeners (registered once)
+    if (!setupDragAndDrop._pointerListenersAdded) {
+        document.addEventListener('pointermove', handlePointerMove, { passive: true });
+        document.addEventListener('pointerup', handlePointerUp, true);
+        document.addEventListener('pointercancel', handlePointerUp, true);
+        setupDragAndDrop._pointerListenersAdded = true;
+    }
 }
 
 let draggedCategory = null;
 
+let pointerDrag = null;
+const POINTER_DRAG_THRESHOLD_PX = 3;
+
 function handleDragStart(e) {
-    draggedCategory = e.target.dataset.category;
-    e.target.classList.add('dragging');
-    e.target.setAttribute('aria-grabbed', 'true');
+    const categoryItem = e.currentTarget;
+    draggedCategory = categoryItem.dataset.category;
+    categoryItem.classList.add('dragging');
+    categoryItem.setAttribute('aria-grabbed', 'true');
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/x-mailsorter-category', draggedCategory);
     e.dataTransfer.setData('text/plain', draggedCategory);
 }
 
+function handlePointerDown(e) {
+    // Only primary mouse button for mouse pointers
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+    const categoryItem = e.currentTarget;
+    const category = categoryItem?.dataset?.category;
+    if (!category) return;
+
+    // Always capture the intended category immediately.
+    // This prevents "previous category" being reused if the gesture is short.
+    draggedCategory = category;
+
+    pointerDrag = {
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        active: false,
+        category,
+        categoryItem,
+        lastFolderItem: null
+    };
+
+    try {
+        categoryItem.setPointerCapture?.(e.pointerId);
+    } catch (_) {
+        // ignore
+    }
+}
+
+function handlePointerMove(e) {
+    if (!pointerDrag || e.pointerId !== pointerDrag.pointerId) return;
+
+    const dx = e.clientX - pointerDrag.startX;
+    const dy = e.clientY - pointerDrag.startY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (!pointerDrag.active) {
+        if (dist < POINTER_DRAG_THRESHOLD_PX) return;
+        pointerDrag.active = true;
+
+        // Mark as actively dragging
+        draggedCategory = pointerDrag.category;
+        pointerDrag.categoryItem.classList.add('dragging');
+        pointerDrag.categoryItem.setAttribute('aria-grabbed', 'true');
+    }
+
+    // Identify folder target under pointer
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const folderItem = under?.closest?.('.folder-item') || null;
+
+    if (pointerDrag.lastFolderItem && pointerDrag.lastFolderItem !== folderItem) {
+        pointerDrag.lastFolderItem.classList.remove('drag-over');
+        pointerDrag.lastFolderItem = null;
+    }
+
+    if (folderItem) {
+        folderItem.classList.add('drag-over');
+        pointerDrag.lastFolderItem = folderItem;
+    }
+}
+
+function handlePointerUp(e) {
+    if (!pointerDrag || e.pointerId !== pointerDrag.pointerId) return;
+
+    const { categoryItem, category } = pointerDrag;
+    const lastFolderItem = pointerDrag.lastFolderItem;
+    const dx = e.clientX - pointerDrag.startX;
+    const dy = e.clientY - pointerDrag.startY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    // Cleanup visuals
+    categoryItem.classList.remove('dragging');
+    categoryItem.setAttribute('aria-grabbed', 'false');
+    if (lastFolderItem) {
+        lastFolderItem.classList.remove('drag-over');
+    }
+
+    // Find folder under pointer at release (more reliable than relying on dragover).
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    const folderItem = under?.closest?.('.folder-item') || lastFolderItem || null;
+
+    const shouldTreatAsDrag = dist >= POINTER_DRAG_THRESHOLD_PX;
+
+    pointerDrag = null;
+
+    if (!folderItem || !shouldTreatAsDrag) {
+        // No mapping; leave click-to-map behavior available.
+        return;
+    }
+
+    // Avoid a stray click toggling selection after a drag gesture
+    try {
+        categoryItem.dataset.msIgnoreClick = '1';
+        setTimeout(() => {
+            try { delete categoryItem.dataset.msIgnoreClick; } catch (_) { /* ignore */ }
+        }, 0);
+        e.preventDefault?.();
+        e.stopPropagation?.();
+    } catch (_) {
+        // ignore
+    }
+
+    const folderPath = folderItem.dataset.folderPath;
+    const folderName = folderItem.dataset.folderName;
+    if (!folderPath || !folderName) return;
+
+    addMapping(category, folderPath, folderName);
+
+    // Clear selection after mapping
+    document.querySelectorAll('.category-item').forEach(c => {
+        c.setAttribute('aria-grabbed', 'false');
+        c.classList.remove('ms-selected');
+    });
+    draggedCategory = null;
+}
+
 function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
-    e.target.setAttribute('aria-grabbed', 'false');
+    const categoryItem = e.currentTarget;
+    categoryItem.classList.remove('dragging');
+    categoryItem.setAttribute('aria-grabbed', 'false');
     draggedCategory = null;
     
     // Remove all drag-over states
@@ -343,16 +577,16 @@ function handleDragEnd(e) {
 function handleDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    e.target.closest('.folder-item')?.classList.add('drag-over');
+    e.currentTarget.classList.add('drag-over');
 }
 
 function handleDragLeave(e) {
-    e.target.closest('.folder-item')?.classList.remove('drag-over');
+    e.currentTarget.classList.remove('drag-over');
 }
 
 function handleDrop(e) {
     e.preventDefault();
-    const folderItem = e.target.closest('.folder-item');
+    const folderItem = e.currentTarget;
     if (!folderItem || !draggedCategory) return;
     
     folderItem.classList.remove('drag-over');
@@ -367,17 +601,17 @@ function handleDrop(e) {
 function handleDragKeydown(e) {
     // Keyboard-based drag and drop
     if (e.key === ' ' || e.key === 'Enter') {
-        const category = e.target.dataset.category;
+        const category = e.currentTarget.dataset.category;
         // Toggle selection for keyboard users
-        if (e.target.getAttribute('aria-grabbed') === 'true') {
-            e.target.setAttribute('aria-grabbed', 'false');
+        if (e.currentTarget.getAttribute('aria-grabbed') === 'true') {
+            e.currentTarget.setAttribute('aria-grabbed', 'false');
             draggedCategory = null;
         } else {
             // Clear other selections
             document.querySelectorAll('.category-item').forEach(c => {
                 c.setAttribute('aria-grabbed', 'false');
             });
-            e.target.setAttribute('aria-grabbed', 'true');
+            e.currentTarget.setAttribute('aria-grabbed', 'true');
             draggedCategory = category;
             announce('Press Enter on a folder to create mapping');
         }
@@ -385,11 +619,76 @@ function handleDragKeydown(e) {
     }
 }
 
+function handleCategoryClick(e) {
+    const categoryItem = e.currentTarget;
+    if (categoryItem?.dataset?.msIgnoreClick === '1') {
+        try { delete categoryItem.dataset.msIgnoreClick; } catch (_) { /* ignore */ }
+        return;
+    }
+    const category = categoryItem.dataset.category;
+    if (!category) return;
+
+    // Toggle selection
+    const isSelected = categoryItem.getAttribute('aria-grabbed') === 'true';
+    document.querySelectorAll('.category-item').forEach(c => {
+        c.setAttribute('aria-grabbed', 'false');
+        c.classList.remove('ms-selected');
+    });
+
+    if (!isSelected) {
+        categoryItem.setAttribute('aria-grabbed', 'true');
+        categoryItem.classList.add('ms-selected');
+        draggedCategory = category;
+        announce('Category selected. Click a folder to map.');
+    } else {
+        draggedCategory = null;
+        announce('Category selection cleared.');
+    }
+}
+
+function handleFolderClick(e) {
+    if (!draggedCategory) return;
+    const folderItem = e.currentTarget;
+    const folderPath = folderItem.dataset.folderPath;
+    const folderName = folderItem.dataset.folderName;
+    if (!folderPath || !folderName) return;
+
+    addMapping(draggedCategory, folderPath, folderName);
+
+    // Clear selection after mapping
+    document.querySelectorAll('.category-item').forEach(c => {
+        c.setAttribute('aria-grabbed', 'false');
+        c.classList.remove('ms-selected');
+    });
+    draggedCategory = null;
+}
+
+function handleFolderKeydown(e) {
+    if (!draggedCategory) return;
+    if (e.key !== ' ' && e.key !== 'Enter') return;
+
+    const folderItem = e.currentTarget;
+    const folderPath = folderItem.dataset.folderPath;
+    const folderName = folderItem.dataset.folderName;
+    if (!folderPath || !folderName) return;
+
+    addMapping(draggedCategory, folderPath, folderName);
+    e.preventDefault();
+}
+
 /**
  * Add a folder mapping
  */
 function addMapping(categoryId, folderPath, folderName) {
     currentConfig.folderMappings = currentConfig.folderMappings || {};
+
+    const existing = currentConfig.folderMappings[categoryId];
+    if (existing && existing.path === folderPath) {
+        const category = window.MS_CONSTANTS?.DEFAULT_CATEGORIES?.find(c => c.id === categoryId);
+        showToast(`"${category?.label || categoryId}" is already mapped to "${folderName}"`, 'info');
+        return;
+    }
+
     currentConfig.folderMappings[categoryId] = {
         path: folderPath,
         name: folderName
@@ -397,9 +696,23 @@ function addMapping(categoryId, folderPath, folderName) {
     
     markDirty();
     renderMappings();
+    renderMappingVisuals();
     
     const category = window.MS_CONSTANTS?.DEFAULT_CATEGORIES?.find(c => c.id === categoryId);
     showToast(`Mapped "${category?.label || categoryId}" → "${folderName}"`, 'success');
+
+    // Ensure the user sees the newly created mapping
+    try {
+        const created = elements.mappingsList.querySelector(`.remove-mapping[data-category="${CSS.escape(categoryId)}"]`);
+        const row = created?.closest?.('.mapping-item');
+        if (row) {
+            row.scrollIntoView({ block: 'nearest' });
+            row.classList.add('ms-highlight');
+            setTimeout(() => row.classList.remove('ms-highlight'), 900);
+        }
+    } catch (_) {
+        // ignore
+    }
 }
 
 /**
@@ -410,6 +723,7 @@ function removeMapping(categoryId) {
         delete currentConfig.folderMappings[categoryId];
         markDirty();
         renderMappings();
+        renderMappingVisuals();
     }
 }
 
@@ -431,7 +745,7 @@ function renderMappings() {
     elements.mappingsList.innerHTML = entries.map(([catId, folder]) => {
         const cat = categories.find(c => c.id === catId);
         return `
-            <li class="ms-list-item mapping-item">
+            <li class="ms-list-item mapping-item" data-category="${catId}" style="--ms-category-accent: var(--ms-category-${catId});">
                 <span class="mapping-category">${cat?.icon || ''} ${cat?.label || catId}</span>
                 <span class="mapping-arrow">→</span>
                 <span class="mapping-folder">📁 ${folder.name}</span>
@@ -450,6 +764,92 @@ function renderMappings() {
             removeMapping(btn.dataset.category);
         });
     });
+
+    renderMappingVisuals();
+}
+
+function renderMappingVisuals() {
+    const mappings = currentConfig.folderMappings || {};
+    const categories = window.MS_CONSTANTS?.DEFAULT_CATEGORIES || [];
+
+    const knownCategoryIds = new Set(categories.map(c => c.id));
+    const catColorVar = (catId) => knownCategoryIds.has(catId) ? `var(--ms-category-${catId})` : 'var(--ms-color-primary)';
+    const buildGradient = (catIds) => {
+        const unique = Array.from(new Set(catIds.filter(id => knownCategoryIds.has(id))));
+        if (unique.length === 0) return null;
+        if (unique.length === 1) {
+            const c = catColorVar(unique[0]);
+            return `linear-gradient(90deg, ${c} 0%, ${c} 100%)`;
+        }
+        const step = 100 / unique.length;
+        const parts = unique.map((id, idx) => {
+            const start = (idx * step).toFixed(2);
+            const end = ((idx + 1) * step).toFixed(2);
+            const c = catColorVar(id);
+            return `${c} ${start}%, ${c} ${end}%`;
+        });
+        return `linear-gradient(90deg, ${parts.join(', ')})`;
+    };
+
+    // Category list: mapped stripe + mapped-to label
+    if (elements.categoryList) {
+        elements.categoryList.querySelectorAll('.category-item').forEach(item => {
+            const catId = item.dataset.category;
+            const mapping = mappings?.[catId];
+            const mappedToEl = item.querySelector('.category-mapped-to');
+
+            if (mapping?.name) {
+                item.classList.add('mapped');
+                if (mappedToEl) mappedToEl.textContent = `→ ${mapping.name}`;
+            } else {
+                item.classList.remove('mapped');
+                if (mappedToEl) mappedToEl.textContent = '';
+            }
+        });
+    }
+
+    // Folder list: emoji tags for categories mapped to this folder path
+    const folderPathToCatIds = new Map();
+    Object.entries(mappings).forEach(([catId, folder]) => {
+        const path = folder?.path;
+        if (!path) return;
+        const list = folderPathToCatIds.get(path) || [];
+        list.push(catId);
+        folderPathToCatIds.set(path, list);
+    });
+
+    if (elements.folderList) {
+        elements.folderList.querySelectorAll('.folder-item').forEach(item => {
+            const folderPath = item.dataset.folderPath;
+            const tagsEl = item.querySelector('.folder-tags');
+            if (!tagsEl) return;
+
+            const catIds = folderPathToCatIds.get(folderPath) || [];
+            const cats = catIds
+                .map(id => categories.find(c => c.id === id))
+                .filter(Boolean);
+
+            const gradient = buildGradient(catIds);
+            if (gradient) {
+                item.classList.add('mapped');
+                item.style.setProperty('--ms-folder-outline', gradient);
+            } else {
+                item.classList.remove('mapped');
+                item.style.removeProperty('--ms-folder-outline');
+            }
+
+            if (cats.length === 0) {
+                tagsEl.innerHTML = '';
+                tagsEl.setAttribute('aria-label', '');
+                return;
+            }
+
+            tagsEl.innerHTML = cats
+                .map(c => `<span class="folder-tag" data-category="${c.id}" title="${c.label}" aria-label="${c.label}">${c.icon}</span>`)
+                .join('');
+            tagsEl.setAttribute('aria-label', `Mapped categories: ${cats.map(c => c.label).join(', ')}`);
+        });
+    }
 }
 
 /**
@@ -547,6 +947,19 @@ function setupEventListeners() {
     elements.resetSettings.addEventListener('click', () => {
         resetSettings();
     });
+
+    // UI preference: font mode
+    if (elements.fontMode) {
+        elements.fontMode.addEventListener('change', async (e) => {
+            const mode = e.target.value;
+            try {
+                await window.MSUiPrefs?.setFontMode?.(mode);
+            } catch (_) {
+                // ignore
+            }
+            showToast('Font preference updated', 'success');
+        });
+    }
     
     // Keyboard shortcut on save
     window.addEventListener('keydown', (e) => {
@@ -577,14 +990,41 @@ function addFolderThreshold() {
 function markDirty() {
     isDirty = true;
     elements.saveButton.textContent = 'Save *';
+
+    // Modern settings UX: autosave after a short debounce.
+    scheduleAutoSave();
+}
+
+function scheduleAutoSave() {
+    const delayMs = window.MS_CONSTANTS?.UI?.DEBOUNCE_SAVE_MS || 500;
+
+    if (_autoSaveTimer) {
+        clearTimeout(_autoSaveTimer);
+        _autoSaveTimer = null;
+    }
+
+    _autoSaveTimer = setTimeout(async () => {
+        _autoSaveTimer = null;
+        if (_autoSaveInProgress) return;
+        if (!isDirty) return;
+        await saveConfiguration({ silent: true });
+    }, delayMs);
 }
 
 /**
  * Save configuration to storage
  */
-async function saveConfiguration() {
-    elements.saveStatus.hidden = false;
+async function saveConfiguration({ silent = false } = {}) {
+    setVisible(elements.saveStatus, true);
     elements.saveButton.disabled = true;
+
+    // Cancel any pending autosave; we're saving now.
+    if (_autoSaveTimer) {
+        clearTimeout(_autoSaveTimer);
+        _autoSaveTimer = null;
+    }
+
+    _autoSaveInProgress = true;
     
     try {
         await browser.storage.local.set({ config: currentConfig });
@@ -601,16 +1041,21 @@ async function saveConfiguration() {
         
         isDirty = false;
         elements.saveButton.textContent = 'Save';
-        
-        showToast(browser.i18n.getMessage('options_saved') || 'Settings saved successfully', 'success');
-        announce('Settings saved');
+
+        if (!silent) {
+            showToast(browser.i18n.getMessage('options_saved') || 'Settings saved successfully', 'success');
+            announce('Settings saved');
+        }
         
     } catch (e) {
         console.error('[Options] Failed to save:', e);
-        showToast('Failed to save settings', 'error');
+        if (!silent) {
+            showToast('Failed to save settings', 'error');
+        }
     } finally {
-        elements.saveStatus.hidden = true;
+        setVisible(elements.saveStatus, false);
         elements.saveButton.disabled = false;
+        _autoSaveInProgress = false;
     }
 }
 
@@ -626,8 +1071,10 @@ async function checkConnection() {
         
         if (response && response.status === 'ok') {
             updateConnectionStatus('connected', response);
+        } else if (response && response.status === 'degraded') {
+            updateConnectionStatus('warning', response);
         } else {
-            updateConnectionStatus('disconnected');
+            updateConnectionStatus('disconnected', response);
         }
         
     } catch (e) {
@@ -647,9 +1094,17 @@ function updateConnectionStatus(status, details = null) {
             elements.statusDot.classList.add('ms-status-dot-connected');
             elements.statusText.textContent = browser.i18n.getMessage('status_connected') || 'Connected';
             break;
+        case 'warning':
+            elements.statusDot.classList.add('ms-status-dot-warning');
+            elements.statusText.textContent = (details?.provider?.name)
+                ? `Connected (${details.provider.name}: degraded)`
+                : 'Connected (degraded)';
+            break;
         case 'disconnected':
             elements.statusDot.classList.add('ms-status-dot-disconnected');
-            elements.statusText.textContent = browser.i18n.getMessage('status_disconnected') || 'Disconnected';
+            elements.statusText.textContent = details?.error
+                ? `Disconnected (${details.error})`
+                : (browser.i18n.getMessage('status_disconnected') || 'Disconnected');
             break;
         case 'checking':
             elements.statusDot.classList.add('ms-status-dot-processing');
@@ -662,35 +1117,45 @@ function updateConnectionStatus(status, details = null) {
  * Test connection to backend
  */
 async function testConnection() {
-    elements.testSpinner.hidden = false;
+    setVisible(elements.testSpinner, true);
     elements.testConnection.disabled = true;
-    elements.testResult.hidden = true;
+    setVisible(elements.testResult, false);
     
     try {
         const response = await browser.runtime.sendMessage({ type: 'test-connection' });
         
-        elements.testResult.hidden = false;
+        setVisible(elements.testResult, true);
         
-        if (response && response.backend && response.llm) {
+        const ok = response && (response.status === 'ok' || response.status === 'degraded');
+        if (ok) {
             elements.testResult.className = 'test-result test-result-success';
-            elements.testResult.textContent = browser.i18n.getMessage('options_connection_success') || 
-                'Connection successful! Backend and LLM are working.';
-            updateConnectionStatus('connected');
+            const providerHealthy = response?.provider?.healthy;
+            if (providerHealthy === true) {
+                elements.testResult.textContent = browser.i18n.getMessage('options_connection_success') || 
+                    'Connection successful! Backend and provider are working.';
+            } else if (providerHealthy === false) {
+                elements.testResult.textContent = 'Backend reachable, but provider health check failed.';
+            } else {
+                elements.testResult.textContent = browser.i18n.getMessage('options_connection_success') || 
+                    'Connection successful! Backend is reachable.';
+            }
+            updateConnectionStatus('connected', response);
         } else {
             elements.testResult.className = 'test-result test-result-error';
-            elements.testResult.textContent = browser.i18n.getMessage('options_connection_failed') || 
-                'Connection failed. Please check your settings.';
-            updateConnectionStatus('disconnected');
+            elements.testResult.textContent = response?.error
+                ? `Connection failed: ${response.error}`
+                : (browser.i18n.getMessage('options_connection_failed') || 'Connection failed. Please check your settings.');
+            updateConnectionStatus('disconnected', response);
         }
         
     } catch (e) {
         console.error('[Options] Test connection failed:', e);
-        elements.testResult.hidden = false;
+        setVisible(elements.testResult, true);
         elements.testResult.className = 'test-result test-result-error';
         elements.testResult.textContent = 'Connection test failed: ' + e.message;
         updateConnectionStatus('disconnected');
     } finally {
-        elements.testSpinner.hidden = true;
+        setVisible(elements.testSpinner, false);
         elements.testConnection.disabled = false;
     }
 }
@@ -794,13 +1259,32 @@ async function resetSettings() {
  * Show a toast notification
  */
 function showToast(message, type = 'info') {
+    // One-time global dismiss handlers
+    if (!showToast._dismissHandlersAdded) {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                elements.toastContainer?.replaceChildren?.();
+            }
+        });
+
+        document.addEventListener('pointerdown', (e) => {
+            const container = elements.toastContainer;
+            if (!container) return;
+            if (!container.contains(e.target)) {
+                container.replaceChildren?.();
+            }
+        });
+
+        showToast._dismissHandlersAdded = true;
+    }
+
     const toast = document.createElement('div');
     toast.className = `ms-toast ms-toast-${type}`;
     toast.innerHTML = `
         <div class="ms-toast-content">
             <div class="ms-toast-message">${message}</div>
         </div>
-        <button class="ms-toast-close" aria-label="Close">×</button>
+        <button class="ms-toast-close" aria-label="Close" type="button">×</button>
     `;
     
     toast.querySelector('.ms-toast-close').addEventListener('click', () => {

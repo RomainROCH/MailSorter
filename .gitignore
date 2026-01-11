@@ -72,6 +72,11 @@ out/
 bin/
 obj/
 
+# Windows native messaging host build outputs
+backend/host/build/
+backend/host/*.exe
+backend/host/*.spec
+
 # Dependencies
 node_modules/
 packages/

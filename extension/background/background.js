@@ -12,6 +12,8 @@ let featureReport = null;
 let stateStore = null;
 let undoManager = null;
 let passiveMode = false;
+let _optionsEditing = false;
+let _optionsPrevPassiveMode = null;
 
 // ============================================================
 // Initialization
@@ -23,9 +25,9 @@ async function initialize() {
     
     // Initialize state store (Phase 5)
     if (window.StateStore) {
-        stateStore = new window.StateStore();
-        await stateStore.load();
-        console.log("[StateStore] Loaded");
+        stateStore = window.StateStore;
+        await stateStore.init();
+        console.log("[StateStore] Initialized");
     }
     
     // Initialize undo manager (UX-005)
@@ -66,6 +68,20 @@ async function initialize() {
 
 // Start initialization
 initialize();
+
+// ============================================================
+// Backend Messaging Helpers
+// ============================================================
+
+async function ensureNativeClientConnected() {
+    if (!client) {
+        client = new window.NativeClient(NATIVE_APP_NAME);
+    }
+    if (!client.isConnected) {
+        client.connect();
+    }
+    return client && client.isConnected;
+}
 
 // ============================================================
 // MIME Parsing Utilities (AUDIT-005)
@@ -197,11 +213,28 @@ window.addEventListener("native-response", async (e) => {
     
     if (response.action === "move" && response.target) {
         try {
+            // Safety: while Options is open, do not move messages.
+            if (_optionsEditing) {
+                console.log("[OptionsEditing] Skipping move while Options is open");
+                if (stateStore) {
+                    try {
+                        await stateStore.recordSort({ folder: response.target, confidence: response.confidence });
+                    } catch (_) {
+                        // ignore
+                    }
+                }
+                return;
+            }
+
             // Skip move in passive mode
             if (passiveMode) {
                 console.log("[PassiveMode] Would move message " + response.id + " to " + response.target);
                 if (stateStore) {
-                    stateStore.recordSort({ suggested: true, applied: false });
+                    try {
+                        await stateStore.recordSort({ folder: response.target, confidence: response.confidence });
+                    } catch (_) {
+                        // ignore
+                    }
                 }
                 return;
             }
@@ -210,7 +243,11 @@ window.addEventListener("native-response", async (e) => {
             
             // Record stats
             if (stateStore) {
-                stateStore.recordSort({ suggested: true, applied: true });
+                try {
+                    await stateStore.recordSort({ folder: response.target, confidence: response.confidence });
+                } catch (_) {
+                    // ignore
+                }
             }
         } catch (err) {
             window.ErrorHandler.handleMoveError(response.id, response.target, err);
@@ -235,7 +272,11 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
         case 'set-passive-mode':
             passiveMode = message.enabled;
             if (stateStore) {
-                stateStore.set('passiveMode', passiveMode);
+                try {
+                    await stateStore.set('config.passiveMode', passiveMode);
+                } catch (_) {
+                    // ignore
+                }
             }
             return { success: true };
         
@@ -247,6 +288,44 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
             await browser.storage.local.set({ config: message.config });
             // Apply config changes
             passiveMode = message.config.passiveMode || false;
+            return { success: true };
+
+        case 'config-updated':
+            // Options page saved config; keep background in sync.
+            if (message.config && typeof message.config.passiveMode !== 'undefined') {
+                // If options is currently open, we force passive mode until it closes.
+                if (!_optionsEditing) {
+                    passiveMode = !!message.config.passiveMode;
+                }
+            }
+            return { success: true };
+
+        case 'options-editing':
+            // Safety: while Options is open, do not move messages.
+            if (message.enabled) {
+                if (!_optionsEditing) {
+                    _optionsEditing = true;
+                    _optionsPrevPassiveMode = passiveMode;
+                    passiveMode = true;
+                }
+            } else {
+                _optionsEditing = false;
+                // Restore passive mode based on current config (preferred) or previous value.
+                try {
+                    const stored = await browser.storage.local.get('config');
+                    const desired = stored?.config?.passiveMode;
+                    if (typeof desired !== 'undefined') {
+                        passiveMode = !!desired;
+                    } else if (_optionsPrevPassiveMode !== null) {
+                        passiveMode = _optionsPrevPassiveMode;
+                    }
+                } catch (e) {
+                    if (_optionsPrevPassiveMode !== null) {
+                        passiveMode = _optionsPrevPassiveMode;
+                    }
+                }
+                _optionsPrevPassiveMode = null;
+            }
             return { success: true };
         
         case 'undo-last-action':
@@ -291,53 +370,81 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
  * Handle health check request
  */
 async function handleHealthCheck() {
-    const isConnected = client && client.isConnected;
-    
-    // If connected, do a quick backend ping
-    let providerHealthy = false;
-    if (isConnected) {
-        try {
-            // The backend health check would need to be implemented
-            providerHealthy = true; // Assume healthy if connected
-        } catch (e) {
-            providerHealthy = false;
+    try {
+        const connected = await ensureNativeClientConnected();
+        if (!connected) {
+            return {
+                status: "error",
+                backend: false,
+                provider: { healthy: false },
+                error: "Native host not connected"
+            };
         }
+
+        // Fast backend reachability check.
+        // Do NOT call provider health here: it can block on network and make the UI look broken.
+        const response = await client.sendRequest(
+            { type: "ping", payload: {} },
+            { timeoutMs: Math.max(window.MS_CONSTANTS?.HEALTH_CHECK?.TIMEOUT_MS || 2000, 2000) }
+        );
+
+        const ok = response && (response.type === "pong" || response.status === "ok");
+
+        // Include configured provider name for UI, but mark health as unknown.
+        let providerName = null;
+        try {
+            const stored = await browser.storage.local.get('config');
+            providerName = stored?.config?.provider || null;
+        } catch (_) {
+            // ignore
+        }
+        return {
+            status: ok ? "ok" : "error",
+            backend: !!ok,
+            provider: { healthy: null, name: providerName }
+        };
+    } catch (e) {
+        return {
+            status: "error",
+            backend: false,
+            provider: { healthy: false },
+            error: e?.message || String(e)
+        };
     }
-    
-    return {
-        status: isConnected ? 'ok' : 'error',
-        backend: isConnected,
-        provider: { healthy: providerHealthy }
-    };
 }
 
 /**
  * Handle connection test request
  */
 async function handleTestConnection() {
+    // Full test: backend reachability + provider health.
     try {
-        if (!client || !client.isConnected) {
-            client = new window.NativeClient(NATIVE_APP_NAME);
-            await client.connect();
+        const connected = await ensureNativeClientConnected();
+        if (!connected) {
+            return {
+                status: "error",
+                backend: false,
+                provider: { healthy: false },
+                error: "Native host not connected"
+            };
         }
-        
-        // Send a health check to backend
-        client.sendMessage({
-            type: "health_check",
-            payload: {}
-        });
-        
-        // Wait briefly for response
-        await new Promise(r => setTimeout(r, 1000));
-        
+
+        const response = await client.sendRequest(
+            { type: "health", payload: {} },
+            { timeoutMs: Math.max(window.MS_CONSTANTS?.HEALTH_CHECK?.TIMEOUT_MS || 15000, 15000) }
+        );
+
         return {
-            success: client.isConnected,
-            message: client.isConnected ? 'Connected' : 'Connection failed'
+            status: response?.status || "error",
+            backend: true,
+            provider: response?.provider || { healthy: false }
         };
     } catch (e) {
         return {
-            success: false,
-            message: e.message
+            status: "error",
+            backend: false,
+            provider: { healthy: false },
+            error: e?.message || String(e)
         };
     }
 }
@@ -371,6 +478,12 @@ async function handleUndo() {
 // Listen for new emails
 browser.messages.onNewMailReceived.addListener(async (folder, messages) => {
     console.log("New mail received in " + folder.name + ": " + messages.messages.length + " message(s)");
+
+    // While Options is open, pause automatic processing (prevents accidental config from moving mail).
+    if (_optionsEditing) {
+        console.log("[OptionsEditing] Auto-processing paused");
+        return;
+    }
     
     for (let message of messages.messages) {
         // Skip already read messages
@@ -443,7 +556,7 @@ async function moveMessage(messageId, targetFolderName, options = {}) {
         try {
             browser.notifications.create({
                 type: 'basic',
-                iconUrl: browser.runtime.getURL('icons/icon-48.png'),
+                iconUrl: browser.runtime.getURL('icons/icon-48.svg'),
                 title: 'Email Sorted',
                 message: `Moved to ${targetFolderName}`
             });

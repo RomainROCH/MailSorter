@@ -325,7 +325,7 @@ Access settings via **Menu** → **Add-ons** → **MailSorter** → **Preference
 | Setting | Description |
 |---------|-------------|
 | API Key | Your Google AI API key |
-| Model | `gemini-1.5-flash` or `gemini-1.5-pro` |
+| Model | `gemini-2.0-flash` or `gemini-2.5-pro` |
 
 ### Folder Mapping
 
@@ -671,8 +671,8 @@ For security vulnerabilities, please see [SECURITY.md](../SECURITY.md) for respo
 | OpenAI | `gpt-4o` | Very High | $$$ |
 | Anthropic | `claude-3-haiku` | High | $ |
 | Anthropic | `claude-3-sonnet` | Very High | $$ |
-| Google | `gemini-1.5-flash` | High | $ |
-| Google | `gemini-1.5-pro` | Very High | $$ |
+| Google | `gemini-2.0-flash` | High | $ |
+| Google | `gemini-2.5-pro` | Very High | $$ |
 
 ### File Locations
 

@@ -135,7 +135,7 @@
 |----------|-------------|--------|--------|
 | **OpenAI** | v1 | ✅ Full | gpt-4o, gpt-4o-mini, gpt-4-turbo |
 | **Anthropic** | 2024-01 | ✅ Full | claude-3.5-sonnet, claude-3-haiku |
-| **Google Gemini** | v1 | ✅ Full | gemini-1.5-pro, gemini-1.5-flash |
+| **Google Gemini** | v1 | ✅ Full | gemini-2.5-pro, gemini-2.0-flash |
 | **Azure OpenAI** | 2024-02 | ⚠️ Planned | via OpenAI provider |
 | **AWS Bedrock** | - | ⚠️ Planned | Future support |
 | **Groq** | - | ⚠️ Planned | Future support |

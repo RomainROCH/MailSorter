@@ -2,7 +2,7 @@
 MailSorter Backend - Version and metadata
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.8"
 __author__ = "MailSorter Contributors"
 __license__ = "MIT"
 __description__ = (

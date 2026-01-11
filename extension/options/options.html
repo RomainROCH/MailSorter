@@ -170,6 +170,17 @@
                 </div>
                 <div class="ms-card-body">
                     <div class="ms-form-group">
+                        <label class="ms-label" for="font-mode">Font</label>
+                        <select id="font-mode" class="ms-select" aria-describedby="font-mode-desc">
+                            <option value="default">System (Default)</option>
+                            <option value="dyslexic">Dyslexia-friendly</option>
+                        </select>
+                        <small id="font-mode-desc" class="ms-field-description">
+                            Adjusts readability in the extension UI only.
+                        </small>
+                    </div>
+
+                    <div class="ms-form-group">
                         <label class="ms-label" for="keyboard-shortcut">Classify Shortcut</label>
                         <input type="text" id="keyboard-shortcut" class="ms-input" readonly placeholder="Ctrl+Shift+M">
                         <small class="ms-field-description">
@@ -209,17 +220,17 @@
                 <span class="ms-spinner ms-spinner-sm"></span>
                 <span>Saving...</span>
             </div>
+            <div id="ms-version" class="ms-version" aria-label="Extension version"></div>
+            <div id="toast-container" class="ms-toast-container" aria-live="polite"></div>
             <button id="save-button" class="ms-button ms-button-primary" type="button" data-i18n="common_save">
                 Save
             </button>
         </footer>
     </main>
     
-    <!-- Toast container for notifications -->
-    <div id="toast-container" class="ms-toast-container" aria-live="polite"></div>
-    
     <script src="../shared/constants.js"></script>
     <script src="../shared/i18n.js"></script>
+    <script src="../shared/ui_prefs.js"></script>
     <script src="options.js"></script>
 </body>
 </html>

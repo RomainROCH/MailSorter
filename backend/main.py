@@ -58,6 +58,10 @@ def main():
             # Dispatching
             response = orchestrator.handle_message(message)
 
+            # Correlate request/response for the extension when requested
+            if isinstance(response, dict) and "request_id" in message:
+                response["request_id"] = message.get("request_id")
+
             send_message(response)
 
         except Exception as e:

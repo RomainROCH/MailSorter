@@ -17,7 +17,7 @@
     "messagesModify",
     "messagesMove",
     "accountsRead",
-    "foldersRead",
+    "accountsFolders",
     "nativeMessaging",
     "storage",
     "notifications",

@@ -9,6 +9,17 @@ REM ============================================================
 
 setlocal enabledelayedexpansion
 
+REM Native Messaging application ID (must match the manifest "name")
+set "APP_NAME=com.mailsorter.backend"
+
+REM Reference manifest template (kept for compatibility/documentation)
+REM The actual Windows install writes a per-user manifest in %LOCALAPPDATA%.
+set "APP_MANIFEST=app_manifest.json"
+
+REM Registry location (per-user, no admin required)
+REM HKCU\Software\Mozilla\NativeMessagingHosts\%APP_NAME%
+set "REG_KEY=HKCU\Software\Mozilla\NativeMessagingHosts\%APP_NAME%"
+
 echo.
 echo NOTE: On Windows, the native host should be an EXE.
 echo Recommended install:

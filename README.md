@@ -1,4 +1,9 @@
-# MailSorter
+# MailSorter - Archived
+
+This project demonstrated the limitations of the Thunderbird market for LLM-powered tools. Giants like Gmail + Gemini and Outlook + Copilot have solved the problem more effectively for 95% of users.
+
+MailSorter remains quality code if someone wants to fork it.
+However, I'm focusing on projects with greater user impact.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-green) ![License](https://img.shields.io/badge/license-MIT-blue) ![Status](https://img.shields.io/badge/status-stable-green)
 
